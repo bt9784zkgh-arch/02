@@ -243,7 +243,7 @@ rt {
 .topbar {
   position: absolute; left: 0; top: 0; width: 1920px; height: 190px;
   z-index: var(--z-ui);
-  display: flex; align-items: center; gap: 40px;
+  display: flex; align-items: center; gap: 24px;
   padding: 24px 578px 16px 48px; /* 右は設定ボタンの場所 */
 }
 /* ステージの本の背（左上） */
@@ -262,7 +262,7 @@ rt {
 }
 /* 進み具合 */
 .progress {
-  flex: 1 1 auto; min-width: 0; max-width: 854px; /* 右はし 1342px まで（設定ボタンは 1382px から） */
+  flex: 1 1 auto; min-width: 0; max-width: 870px; /* 右はし 1342px まで（設定ボタンは 1382px から）。おてほん＋5問でも入る */
   height: 132px;
   display: flex; align-items: center; gap: 18px;
   padding: 10px 22px;
@@ -271,17 +271,17 @@ rt {
 }
 .progress__steps { display: flex; gap: 8px; flex: none; margin: 0; padding: 0; list-style: none; }
 .step-chip {
-  width: 64px; height: 64px; display: grid; place-items: center;
+  width: 60px; height: 60px; display: grid; place-items: center;
   border: 3px dashed var(--ink-soft); border-radius: 50%;
   font-size: var(--fs-ui); font-weight: 700; color: var(--ink-soft);
 }
-.step-chip.is-now  { border: 5px solid var(--ink); color: var(--ink); width: 76px; height: 76px; font-size: 34px; }
+.step-chip.is-now  { border: 5px solid var(--ink); color: var(--ink); width: 72px; height: 72px; font-size: 34px; }
 .step-chip.is-done { border: 3px solid var(--ink); background: var(--ink); color: var(--paper); }
-.progress__label { margin: 0; min-width: 0; font-size: var(--fs-ui); line-height: 1.7; white-space: nowrap; }
+.progress__label { margin: 0; flex: none; font-size: var(--fs-ui); line-height: 1.7; white-space: nowrap; }
 .progress__label b { font-size: 40px; font-weight: 700; }
-.dots { display: flex; gap: 8px; flex: none; margin: 0 0 0 auto; padding: 0; list-style: none; }
-.dot { width: 26px; height: 26px; border: 3px solid var(--ink-soft); border-radius: 50%; }
-.dot.is-now  { width: 34px; height: 34px; border: 5px solid var(--ink); margin-top: -4px; }
+.dots { display: flex; gap: 6px; flex: none; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.dot { width: 24px; height: 24px; border: 3px solid var(--ink-soft); border-radius: 50%; }
+.dot.is-now  { width: 30px; height: 30px; border: 5px solid var(--ink); margin-top: -4px; }
 .dot.is-done { background: var(--ink); border-color: var(--ink); }
 
 /* =====================================================================

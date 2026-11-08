@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ことばの じてんを つくろう</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ゲーム組立担当が足した小さな決まり（style.css は変えない） */
+  .q-scene.is-emph { box-shadow: 0 0 0 8px var(--hint); border-color: var(--ink); }
+  .sheet__swatches .legend-item { padding: 6px 20px; border: 3px solid var(--nk-line); border-radius: 4px; background: var(--nk-tint); transition: box-shadow 600ms ease; }
+  .sheet__swatches .legend-item.is-glow { box-shadow: 0 0 0 8px var(--nk); }
+  .jiten-page__meaning.is-hidden { visibility: hidden; }
+  .guide-pointer.is-off { display: none; }
+  .guide-bubble > span { display: block; }
+  .cover-actions { display: flex; gap: 24px; align-items: center; }
+  .jiten-cover:focus-visible { outline-offset: 10px; }
+  .review__pick .card { cursor: pointer; }
+  .title-book { --book: var(--jiten-cloth); }
+</style>
+</head>
+<body>
+<script src="assets/motifs.js"></script>
+
+<div id="stage" class="stage" data-screen="title" data-motion="normal">
+
+  <!-- 1. タイトル -->
+  <section class="screen screen--title is-active" data-screen="title" aria-label="タイトル">
+    <div class="title-book cloth">
+      <span class="title-book__ribbon"></span>
+      <div class="title-book__slip paper">ことばの<br>じてん</div>
+    </div>
+    <div class="title-side">
+      <h1 class="t-h1">ことばの じてんを つくろう</h1>
+      <p class="title-side__lead wakachi" id="title-lead"></p>
+      <button type="button" class="btn btn--primary btn--big" id="btn-start">はじめる</button>
+    </div>
+    <img class="cover-guide" src="assets/guide.svg" alt="しおりさん">
+  </section>
+
+  <!-- 2. 本だな -->
+  <section class="screen screen--menu" data-screen="menu" aria-label="本だな">
+    <h1 class="t-h1 menu-title">どの <ruby>本<rt>ほん</rt></ruby>を ひらく？</h1>
+    <div class="shelf">
+      <ul class="shelf__row" id="shelf-row-1"></ul>
+      <ul class="shelf__row" id="shelf-row-2"></ul>
+    </div>
+    <div class="jiten-cover cloth" id="jiten-cover" tabindex="0">
+      <div class="jiten-cover__slip paper">ことばの<br>じてん</div>
+      <ul class="jiten-cover__slots" id="cover-slots"></ul>
+      <p class="jiten-cover__count" id="cover-count"></p>
+    </div>
+  </section>
+
+  <!-- 3. ステージの表紙 -->
+  <section class="screen screen--cover" data-screen="cover" aria-label="ステージの表紙">
+    <header class="topbar"><h1 class="t-h1" id="cover-h1">ステージ 1</h1></header>
+    <div class="cover-book cloth" id="cover-book">
+      <span class="cover-book__ribbon"></span>
+      <span class="cover-book__num paper" id="cover-num">1</span>
+      <div class="cover-book__slip paper" id="cover-slip"></div>
+    </div>
+    <div class="cover-side" id="cover-side">
+      <p class="cover-side__lead wakachi" id="cover-lead"></p>
+      <ol class="cover-steps" id="cover-steps"></ol>
+      <div class="cover-actions">
+        <button type="button" class="btn btn--primary btn--big" id="cover-start">はじめる</button>
+        <button type="button" class="btn" id="cover-restart" hidden>はじめから</button>
+      </div>
+    </div>
+    <img class="cover-guide" src="assets/guide-point.svg" alt="">
+  </section>
+
+  <!-- 4. 問題（おてほん・問題 は同じ配置） -->
+  <section class="screen screen--play" data-screen="play" id="scr-play" aria-label="もんだい">
+    <header class="topbar">
+      <div class="stage-tab cloth" id="play-tab"><div class="stage-tab__slip paper" id="play-tab-slip"></div></div>
+      <div class="progress paper">
+        <ol class="progress__steps" id="play-steps" aria-label="ステップ"></ol>
+        <p class="progress__label" id="play-label"></p>
+        <ol class="dots" id="play-dots" aria-hidden="true"></ol>
+        <span class="vh" id="play-vh" aria-live="polite"></span>
+      </div>
+    </header>
+    <div class="q-strip paper tape">
+      <span class="q-tag" id="q-tag">おてほん</span>
+      <button type="button" class="btn btn-read" id="btn-read" aria-label="もんだいを よむ"><svg class="motif" aria-hidden="true"><use href="#m-i-speaker"/></svg>よむ</button>
+      <div class="q-scene" id="q-scene" aria-hidden="true"></div>
+      <p class="q-text wakachi" id="q-text"></p>
+    </div>
+    <ul class="choices" id="choices" data-count="3"></ul>
+    <svg class="guide-pointer is-off" id="pointer" aria-hidden="true"><use href="#m-hand-point"/></svg>
+    <footer class="guidebar">
+      <img class="guide" id="guide-img" src="assets/guide.svg" alt="しおりさん">
+      <p class="guide-bubble paper" id="bubble" aria-live="polite"></p>
+      <div class="footer-actions">
+        <button type="button" class="btn btn-next is-hidden" id="btn-next">つぎへ</button>
+        <button type="button" class="btn btn-jiten" id="btn-jiten" aria-label="じてんを 見る">
+          <span class="mini-grid" id="mini-grid" aria-hidden="true"></span>
+          <span class="btn-jiten__label">じてん<span class="btn-jiten__count" id="jiten-count">0／20</span></span>
+        </button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- 5. じてんのページ -->
+  <section class="screen screen--jiten" data-screen="jiten" aria-label="じてんの ページ">
+    <article class="jiten-page paper">
+      <div class="jiten-page__head">
+        <h2 class="jiten-page__title" id="jiten-title"></h2>
+        <ul class="jiten-legend" id="jiten-legend"></ul>
+      </div>
+      <button type="button" class="btn btn-close" id="btn-close">とじる</button>
+      <ul class="masu-grid" id="masu-grid" data-count="20"></ul>
+      <p class="jiten-page__meaning wakachi is-hidden" id="jiten-meaning"></p>
+    </article>
+  </section>
+
+  <!-- 6. ふり返り -->
+  <section class="screen screen--review" data-screen="review" aria-label="ふり返り">
+    <header class="topbar">
+      <div class="stage-tab cloth" id="rev-tab"><div class="stage-tab__slip paper" id="rev-tab-slip"></div></div>
+      <div class="progress paper"><p class="progress__label t-head" style="font-size:44px">ふり<ruby>返<rt>かえ</rt></ruby>り</p></div>
+    </header>
+    <article class="review-page paper" id="review-page">
+      <div class="review__left">
+        <h2 class="review__title" id="rev-title"></h2>
+        <p class="review__meaning wakachi" id="rev-meaning"></p>
+        <ul class="checklist" id="rev-checks"></ul>
+        <p class="review__last wakachi" id="rev-last"></p>
+        <div class="review__actions">
+          <button type="button" class="btn" id="rev-again"><svg class="motif" aria-hidden="true"><use href="#m-i-again"/></svg>もういちど</button>
+          <button type="button" class="btn btn--primary" id="rev-end"><svg class="motif" aria-hidden="true"><use href="#m-i-back"/></svg><ruby>本<rt>ほん</rt></ruby>だなへ</button>
+        </div>
+      </div>
+      <div class="review__right">
+        <div class="review__stamps" id="rev-stamps" aria-hidden="true">
+          <img src="assets/stamp-dekita.svg" alt=""><img src="assets/stamp-dekita.svg" alt=""><img src="assets/stamp-dekita.svg" alt="">
+        </div>
+        <p class="review__pick-label wakachi" id="rev-pick-label"></p>
+        <div class="review__pick" id="rev-pick"></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ステップのおわり（まとめ） -->
+  <div class="sheet-overlay" id="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet paper">
+      <img class="sheet__stamp" id="sheet-stamp" src="assets/stamp-dekita.svg" alt="できた の はんこ">
+      <h2 class="sheet__title wakachi" id="sheet-title"></h2>
+      <p class="sheet__text wakachi" id="sheet-text"></p>
+      <ul class="sheet__swatches" id="sheet-swatches"></ul>
+      <button type="button" class="btn btn--primary btn--big" id="sheet-next">つぎへ</button>
+    </div>
+  </div>
+
+  <!-- 右上の設定（Tab の順で最後にするため、画面のあとに置く） -->
+  <ul class="settings">
+    <li><button type="button" class="btn btn-setting" id="set-sound" aria-pressed="true" aria-label="おと あり">
+      <svg class="motif" aria-hidden="true"><use href="#m-i-sound-on"/></svg>
+      <span class="btn-setting__name">おと</span><span class="btn-setting__state">あり</span></button></li>
+    <li><button type="button" class="btn btn-setting" id="set-motion" aria-pressed="true" aria-label="うごき ふつう">
+      <svg class="motif" aria-hidden="true"><use href="#m-i-motion"/></svg>
+      <span class="btn-setting__name">うごき</span><span class="btn-setting__state">ふつう</span></button></li>
+    <li><button type="button" class="btn btn-setting" id="set-back" aria-label="もどる">
+      <svg class="motif" aria-hidden="true"><use href="#m-i-back"/></svg>
+      <span class="btn-setting__name">もどる</span><span class="btn-setting__state"><ruby>本<rt>ほん</rt></ruby>だな</span></button></li>
+  </ul>
+
+  <div id="stage3d" class="layer-3d" aria-hidden="true"></div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="motion3d.js"></script>
+<script src="bgm.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

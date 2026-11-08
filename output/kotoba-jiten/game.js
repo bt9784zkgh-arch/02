@@ -113,7 +113,7 @@ const LESSON = {
         Y10: ['{一人|ひとり}で いる {人|ひと}に {声|こえ}を かける', 3, 'bench p-student'],
         Y11: ['「{上手|じょうず}だね」と ほめる', 3, 'hand-thumb brush'],
         Y12: ['{高|たか}い {所|ところ}の {物|もの}を {取|と}って あげる', 1, 'book hand'],
-        Y13: ['{困|こま}っている {人|ひと}に「{手伝|てつだ}おうか？」', 3, 'bubble print'],
+        Y13: ['{困|こま}っている {人|ひと}に 「{手伝|てつだ}おうか？」', 3, 'bubble print'],
         Y14: ['{車|くるま}いすの {人|ひと}に {道|みち}を あける', 2, 'wheelchair p-student'],
         Y15: ['{傘|かさ}に {入|い}れて あげる', 2, 'rain-umbrella p-pair'],
         Y16: ['{保健室|ほけんしつ}まで {付|つ}きそう', 1, 'p-pair door']
@@ -181,10 +181,10 @@ const LESSON = {
         OM07: ['きつい {言|い}い{方|かた}を やわらかく {言|い}い{直|なお}す', 1, 'bubble-soft', 'こわいな'],
         OM08: ['{忙|いそが}しそうな {先生|せんせい}には {後|あと}で {話|はな}しかける', 2, 'p-adult clock', '{今|いま} {手|て}が はなせない'],
         OM09: ['{一人|ひとり}に なりたそうな ときは そっと しておく', 3, 'p-back p-student', '{少|すこ}し {一人|ひとり}で いたい'],
-        OM10: ['{写真|しゃしん}を のせる {前|まえ}に「いい？」と {聞|き}く', 3, 'phone bubble', '{顔|かお}が {出|で}るのは いや かも'],
+        OM10: ['{写真|しゃしん}を のせる {前|まえ}に 「いい？」と {聞|き}く', 3, 'phone bubble', '{顔|かお}が {出|で}るのは いや かも'],
         OM11: ['{疲|つか}れている {家|いえ}の {人|ひと}には {話|はなし}を {短|みじか}くする', 2, 'p-adult bubble', '{今日|きょう}は {疲|つか}れた'],
         OM12: ['{結果|けっか}が {悪|わる}かった {友|とも}だちに {点数|てんすう}を {聞|き}かない', 3, 'print p-worry', '{知|し}られたくない'],
-        OM13: ['「なんで？」を「どうしたの？」に {変|か}える', 1, 'bubble-soft bubble', '{責|せ}められてる？'],
+        OM13: ['「なんで？」を 「どうしたの？」に {変|か}える', 1, 'bubble-soft bubble', '{責|せ}められてる？'],
         OM14: ['{返事|へんじ}が なくても {何度|なんど}も {送|おく}らない', 2, 'phone-quiet clock', '{今|いま}は {返|かえ}せない'],
         OM15: ['{具合|ぐあい}の {悪|わる}い {人|ひと}の {近|ちか}くでは {静|しず}かにする', 3, 'p-bed silent', '{頭|あたま}が いたい'],
         OM16: ['{相手|あいて}の {好|す}きな ものを {悪|わる}く {言|い}わない', 1, 'keychain bubble', '{好|す}きな ものを わかって ほしい']
@@ -245,10 +245,10 @@ const LESSON = {
       summary1: 'ありがとうは、{言葉|ことば}でも、{態度|たいど}でも、お{返|かえ}しでも {伝|つた}えられる',
       last: 'ありがとうは、{言葉|ことば}でも {態度|たいど}でも {伝|つた}わる',
       cards: {
-        A01: ['プリントを もらって「ありがとう」', 1, 'print-hand bubble'],
+        A01: ['プリントを もらって 「ありがとう」', 1, 'print-hand bubble'],
         A02: ['ドアを {開|あ}けて もらって お{礼|れい}を {言|い}う', 1, 'door p-bow'],
-        A03: ['{手|て}を {合|あ}わせて「ごちそうさま」', 2, 'bento p-bow'],
-        A04: ['{家|いえ}の {人|ひと}に「ごはん ありがとう」', 1, 'bowl p-adult'],
+        A03: ['{手|て}を {合|あ}わせて 「ごちそうさま」', 2, 'bento p-bow'],
+        A04: ['{家|いえ}の {人|ひと}に 「ごはん ありがとう」', 1, 'bowl p-adult'],
         A05: ['{相手|あいて}の {目|め}を {見|み}て {言|い}う', 2, 'p-pair bubble'],
         A06: ['{軽|かる}く おじぎを する', 2, 'p-bow'],
         A07: ['お{礼|れい}の {手紙|てがみ}を {書|か}く', 3, 'letter pen'],
@@ -315,8 +315,8 @@ const LESSON = {
       summary1: '{申|もう}し{訳|わけ}ない ときは、① {気|き}づく ② あやまる ③ {直|なお}す',
       last: '{失敗|しっぱい}は だれにでも ある。あやまって、{直|なお}せば だいじょうぶ',
       cards: {
-        MO01: ['ぶつかったら「ごめんなさい」と {言|い}う', 2, 'p-bow bubble'],
-        MO02: ['{遅|おく}れて「すみません」と {言|い}う', 2, 'door clock'],
+        MO01: ['ぶつかったら 「ごめんなさい」と {言|い}う', 2, 'p-bow bubble'],
+        MO02: ['{遅|おく}れて 「すみません」と {言|い}う', 2, 'door clock'],
         MO03: ['{頭|あたま}を {下|さ}げて あやまる', 2, 'p-bow'],
         MO04: ['きつく {言|い}いすぎたら あやまる', 2, 'bubble-soft bubble'],
         MO05: ['{忘|わす}れ{物|もの}を して {先輩|せんぱい}に あやまる', 2, 'bag p-bow'],
@@ -534,7 +534,7 @@ const LESSON = {
         SH05: ['{困|こま}った ことを {先生|せんせい}に {相談|そうだん}する', 2, 'p-adult p-student'],
         SH06: ['{悩|なや}みを {家|いえ}の {人|ひと}に {話|はな}す', 2, 'bowl p-adult'],
         SH07: ['{仲|なか}の いい {友|とも}だちに {本音|ほんね}を {話|はな}す', 2, 'bench p-pair'],
-        SH08: ['わからない ことを「{教|おし}えて」と {聞|き}く', 2, 'notebook bubble'],
+        SH08: ['わからない ことを 「{教|おし}えて」と {聞|き}く', 2, 'notebook bubble'],
         SH09: ['{友|とも}だちの {話|はなし}を {信|しん}じて {聞|き}く', 3, 'p-pair bubble'],
         SH10: ['{遅|おく}れる {友|とも}だちを {信|しん}じて {待|ま}つ', 3, 'clock phone-msg'],
         SH11: ['{仲間|なかま}の {力|ちから}を {信|しん}じて {応援|おうえん}する', 3, 'p-group hand-thumb'],
@@ -555,7 +555,7 @@ const LESSON = {
       },
       step2: {
         otehon: { ok: 'SH01', ng: '「どうせ できない」と {全部|ぜんぶ} {自分|じぶん}で やる', ngArt: 'tag p-worry',
-                  okSay: '{任|まか}せると {友|とも}だちも がんばれる', ngSay: 'こっちだと {友|とも}だちが {困|こま}るね' },
+                  okSay: '{任|まか}せると {友|とも}だちも がんばれる', ngSay: 'こっちだと {友|とも}だちが がっかりするね' },
         questions: [
           { ok: 'SH03', ng: '{横|よこ}から {全部|ぜんぶ} やり{直|なお}す', ngArt: 'p-pair hand', praise: 'その{通|とお}り。{任|まか}された {人|ひと}が がんばれる', hint: '{見守|みまも}っているのは どっち？' },
           { ok: 'SH08', ng: 'わからない まま {一人|ひとり}で かかえる', ngArt: 'notebook p-worry', praise: 'いいね。{聞|き}ける ことも {大切|たいせつ}', hint: '「{教|おし}えて」と {言|い}っているのは どっち？' },
@@ -693,6 +693,7 @@ const LESSON = {
       if (d < bestD) { bestD = d; best = i; }
     }
     const a = toks.slice(0, best).join(' '), b = toks.slice(best).join(' ');
+    if (Math.max(vlen(a), vlen(b)) > longAt) console.warn('[02] 1行が長すぎます。ことばの間に スペースを 入れてください:', plain(src));
     return { html: ruby(a) + '<br>' + ruby(b), two: true, long: Math.max(vlen(a), vlen(b)) > longAt };
   }
 
@@ -854,7 +855,7 @@ const LESSON = {
     const onTitle = S.screen === 'title';
     setBack.disabled = onTitle;
     const toTitle = S.screen === 'menu';
-    $('.btn-setting__state', setBack).textContent = onTitle ? '—' : (toTitle ? 'タイトル' : '本だな');
+    $('.btn-setting__state', setBack).innerHTML = onTitle ? '—' : (toTitle ? 'タイトル' : '<ruby>本<rt>ほん</rt></ruby>だな');
     setBack.setAttribute('aria-label', onTitle ? 'もどる' : (toTitle ? 'タイトルへ もどる' : '本だなへ もどる'));
   }
   setBack.addEventListener('click', () => {
@@ -1246,7 +1247,7 @@ const LESSON = {
     const ok = exampleChoice(o.ok), ngs = o.ng.map((x) => ngChoice(x));
     const list = place(ok, ngs, 1);
     const q = { tag: true, scene: o.scene, sceneArt: o.sceneArt, ask: T.ask3, choices: list, neutral: true, thoughtCards: false };
-    if (st.thought) q.thought = o.thought || ok.thought;
+    // 想像の雲を帯に出すのはステップ2だけ（design.md 8章）。ステップ3は場面の文で伝える
     renderQuestion(q);
     say(T.otehon3, '', 'point');
     await wait(900, run);
@@ -1297,7 +1298,6 @@ const LESSON = {
       const ok = exampleChoice(qd.ok, qd.okText); const ngs = qd.ng.map((x) => ngChoice(x));
       const choices = place(ok, ngs, POS3[S.qi % POS3.length]);
       const q = { scene: qd.scene, sceneArt: qd.sceneArt, ask: T.ask3, choices, neutral: true, thoughtCards: false };
-      if (st.thought) q.thought = qd.thought || ok.thought;
       renderQuestion(q);
       say(T.start3, '', 'normal');
     }
@@ -1381,7 +1381,7 @@ const LESSON = {
       el.classList.add('is-retry');
       okEl.classList.add('is-hint');                 // 正解がゆっくりふくらんで光る
       if (S.choices.length > 2) el.classList.add('is-out'); // 3まいのときは2まいにしぼる
-      const msg = c.retry ? c.retry : qd.hint;
+      const msg = qd.hint || T.retry;            // 2回目は、特別なことばがあっても ふつうのヒントへ
       say(msg, 'retry', 'think');
       autoSpeak([msg]);
     } else {

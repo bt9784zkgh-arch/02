@@ -1,0 +1,745 @@
+/* =====================================================================
+   ことばの じてんを つくろう — style.css
+   02 デザイン担当（art-director）
+   テーマ: 「図書室の手製本」— 布張りの辞書・図書カード・本だな・しおり・はんこ
+   基準 1920×1080 の固定ステージを、JS で画面に合わせて拡大縮小する（design.md 参照）
+   ===================================================================== */
+
+/* ---------- フォント（fonts/ に同梱。OFL。無いときは端末の丸ゴシックへ） ---------- */
+@font-face {
+  font-family: "Zen Maru 02";
+  src: local("Zen Maru Gothic Medium"), local("ZenMaruGothic-Medium"),
+       url("fonts/ZenMaruGothic-Medium.subset.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Zen Maru 02";
+  src: local("Zen Maru Gothic Bold"), local("ZenMaruGothic-Bold"),
+       url("fonts/ZenMaruGothic-Bold.subset.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Klee 02";
+  src: local("Klee One SemiBold"), local("KleeOne-SemiBold"),
+       url("fonts/KleeOne-SemiBold.subset.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+
+/* ---------- デザイントークン ---------- */
+:root {
+  /* 基本の4色＋背景 */
+  --desk:        #D8DBCD;  /* 机の上の麻布（背景） */
+  --desk-deep:   #C6CAB9;  /* 画面のふち（レターボックス） */
+  --paper:       #FBF8F1;  /* 紙（カード・ページ） */
+  --paper-2:     #F1EDE1;  /* 少し古い紙（帯・空きマス） */
+  --ink:         #263040;  /* 藍墨（文字・線） */
+  --ink-soft:    #4B5563;  /* ふりがな・補助の文字 */
+  --accent:      #A23B2E;  /* 朱（はんこ・まる・しおりひも）— 正解の印にだけ使う */
+  --press:       #2F4668;  /* 押すボタン（紺の布） */
+
+  /* 線・面の補助 */
+  --rule:        #E2DACA;  /* 図書カードの罫線 */
+  --line:        #B9B2A0;  /* うすい区切り線 */
+  --focus:       #1D4E89;  /* キーボードのフォーカス枠 */
+  --hint:        #EBCB6B;  /* ヒントのやわらかい光（点滅しない） */
+  --tape:        rgba(226, 205, 150, .86); /* マスキングテープ */
+  --wood:        #7B5737;  /* 本だな */
+  --wood-dark:   #5A3E26;
+  --wood-back:   #43301F;
+  --jiten-cloth: #3E4E5E;  /* 「ことばの じてん」の表紙 */
+
+  /* なかま（全ステージ共通の3色）: 色＋形（まる/さんかく/しかく）で区別 */
+  --nk1:      #D08A3E;  --nk1-line: #B4691F;  --nk1-ink: #8A4B12;  --nk1-tint: #F7E6D2;  /* だいだい・まる */
+  --nk2:      #6E9A55;  --nk2-line: #5B8A45;  --nk2-ink: #3E6630;  --nk2-tint: #E3EDD9;  /* みどり・さんかく */
+  --nk3:      #5C97BA;  --nk3-line: #3F7FA6;  --nk3-ink: #2D5F7F;  --nk3-tint: #DCEBF3;  /* みずいろ・しかく */
+
+  /* 8さつの本（布の色）。文字は必ず紙の題簽（ラベル）の上に書くので、布色は飾り */
+  --book-1: #9C3F35;  /* 大切にする     茜 */
+  --book-2: #B8873A;  /* やさしくする   山吹茶 */
+  --book-3: #6F6A92;  /* 思いやり       藤鼠 */
+  --book-4: #4E8060;  /* ありがとう     若竹 */
+  --book-5: #59636F;  /* 申し訳ない     鈍色 */
+  --book-6: #8E5B3A;  /* 協力する       柿渋 */
+  --book-7: #2F4668;  /* 責任を持つ     紺 */
+  --book-8: #3E7C7A;  /* 信頼する       青磁 */
+
+  /* 絵（motifs.js）の中で使う色 */
+  --m-skin: #F0D7BD; --m-hair: #3B3431; --m-cloth: #4A5A78; --m-cloth2: #6C7F6A; --m-cloth3: #8A6F5A;
+  --m-adult: #8A7A62; --m-tint: #E9E2D0; --m-wood: #B08457; --m-grey: #CDD0C4; --m-water: #A9CDE0; --m-yellow: #E8C66A;
+
+  /* 文字 */
+  --font-body: "Zen Maru 02", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Meiryo", sans-serif;
+  --font-head: "Klee 02", "Klee One", "Zen Maru 02", "Hiragino Maru Gothic ProN", "BIZ UDPGothic", serif;
+  --fs-display: 88px;  /* ステージの表紙の言葉 */
+  --fs-h1: 56px;       /* 画面の見出し */
+  --fs-question: 44px; /* 問題文（36px以上） */
+  --fs-card: 32px;     /* カードの文 */
+  --fs-feedback: 34px; /* ガイドのことば */
+  --fs-body: 30px;     /* 本文 */
+  --fs-ui: 28px;       /* ボタンのラベル・マスの文（最小） */
+  --lh: 1.75;          /* ふりがなが入る行の行間（1.6以上） */
+
+  /* 形 */
+  --r-card: 6px;   /* 図書カード */
+  --r-btn: 16px;   /* 押すボタン */
+  --r-strip: 2px;  /* 紙の帯 */
+  --shadow-paper: 0 2px 0 #CFC8B6, 0 12px 20px -14px rgba(38, 48, 64, .45);
+  --shadow-press: 0 8px 0 var(--ink);
+
+  /* 動き（うごきをへらす で 0 に） */
+  --t-fast: 160ms;
+  --t-mid: 320ms;
+  --t-slow: 1200ms;
+  --ease-spring: cubic-bezier(.34, 1.4, .64, 1);
+
+  /* 3Dの「さわらない」領域の目安（design.md 参照） */
+  --z-desk: 0; --z-ui: 10; --z-3d: 40; --z-overlay: 60; --z-settings: 80;
+}
+
+/* ---------- 下地 ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--desk-deep);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+img, svg { display: block; }
+
+/* 1920×1080 の舞台。--stage-scale は JS で入れる */
+.stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: center center;
+  overflow: hidden;
+  background-color: var(--desk);
+  /* 麻布の目（ごく弱く） */
+  background-image:
+    repeating-linear-gradient(0deg, rgba(38, 48, 64, .035) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px 5px);
+  font-size: var(--fs-body);
+  line-height: var(--lh);
+}
+.layer-3d { position: absolute; inset: 0; z-index: var(--z-3d); pointer-events: none; }
+.layer-3d canvas { width: 100% !important; height: 100% !important; }
+
+/* 画面の切りかえ */
+.screen { position: absolute; inset: 0; z-index: var(--z-ui); display: none; }
+.screen.is-active { display: block; }
+
+/* ---------- 文字 ---------- */
+ruby { ruby-position: over; }
+rt {
+  font-family: var(--font-body);
+  font-size: .5em;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0;
+  line-height: 1;
+}
+.t-head { font-family: var(--font-head); font-weight: 600; letter-spacing: .02em; }
+.t-h1 { font-family: var(--font-head); font-weight: 600; font-size: var(--fs-h1); line-height: 1.6; margin: 0; }
+.t-body { font-size: var(--fs-body); line-height: var(--lh); }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* 分かち書きの半角スペースでだけ改行する */
+.wakachi { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; text-wrap: balance; }
+
+/* ---------- フォーカス（キーボード） ---------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 6px solid var(--focus);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+
+/* ---------- 紙の質感 ---------- */
+.paper {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* マスキングテープ（左上・右上） */
+.tape::before, .tape::after {
+  content: ""; position: absolute; top: -18px; width: 120px; height: 38px;
+  background: var(--tape);
+  clip-path: polygon(0 8%, 6% 0, 12% 10%, 18% 0, 24% 8%, 30% 0, 36% 9%, 42% 0, 48% 8%, 54% 0, 60% 10%, 66% 0, 72% 8%, 78% 0, 84% 9%, 90% 0, 96% 8%, 100% 0, 100% 92%, 94% 100%, 88% 90%, 82% 100%, 76% 92%, 70% 100%, 64% 91%, 58% 100%, 52% 92%, 46% 100%, 40% 90%, 34% 100%, 28% 92%, 22% 100%, 16% 91%, 10% 100%, 4% 92%, 0 100%);
+  pointer-events: none;
+}
+.tape::before { left: 28px; transform: rotate(-4deg); }
+.tape::after  { right: 28px; transform: rotate(3deg); }
+
+/* ---------- 布の色（本ごと） ---------- */
+.bk-1 { --book: var(--book-1); } .bk-2 { --book: var(--book-2); }
+.bk-3 { --book: var(--book-3); } .bk-4 { --book: var(--book-4); }
+.bk-5 { --book: var(--book-5); } .bk-6 { --book: var(--book-6); }
+.bk-7 { --book: var(--book-7); } .bk-8 { --book: var(--book-8); }
+.cloth {
+  background-color: var(--book, var(--jiten-cloth));
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .07) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, .09) 0 1px, transparent 1px 4px);
+}
+
+/* ---------- なかまの色 ---------- */
+.nk-1 { --nk: var(--nk1); --nk-line: var(--nk1-line); --nk-ink: var(--nk1-ink); --nk-tint: var(--nk1-tint); }
+.nk-2 { --nk: var(--nk2); --nk-line: var(--nk2-line); --nk-ink: var(--nk2-ink); --nk-tint: var(--nk2-tint); }
+.nk-3 { --nk: var(--nk3); --nk-line: var(--nk3-line); --nk-ink: var(--nk3-ink); --nk-tint: var(--nk3-tint); }
+.nk-mark { width: 40px; height: 40px; color: var(--nk); flex: none; }
+
+/* =====================================================================
+   ボタン
+   ===================================================================== */
+.btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 14px;
+  min-width: 120px; min-height: 120px;
+  padding: 16px 28px;
+  border: 4px solid var(--ink);
+  border-radius: var(--r-btn);
+  background: var(--paper);
+  box-shadow: var(--shadow-press);
+  font-size: var(--fs-body); font-weight: 700; line-height: 1.3;
+  cursor: pointer;
+  transition: transform var(--t-fast) ease, box-shadow var(--t-fast) ease, background-color var(--t-fast);
+}
+.btn:hover { background: #FFFDF7; transform: translateY(-2px); box-shadow: 0 10px 0 var(--ink); }
+.btn:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--ink); }
+.btn[disabled], .btn.is-disabled { opacity: .45; cursor: default; box-shadow: 0 4px 0 var(--ink); transform: none; }
+.btn .motif { width: 52px; height: 52px; flex: none; }
+.btn--primary { background: var(--press); color: var(--paper); border-color: var(--ink); }
+.btn--primary:hover { background: #3A5479; }
+.btn--primary rt { color: #DCE3EC; }
+.btn--big { min-width: 360px; min-height: 140px; font-size: 40px; font-family: var(--font-head); font-weight: 600; }
+.btn--stack { flex-direction: column; gap: 4px; padding: 12px; }
+
+/* 右上の設定（おと・うごき・もどる）: 全画面で同じ位置 */
+.settings {
+  position: absolute; top: 24px; right: 40px; z-index: var(--z-settings);
+  display: flex; gap: 24px; margin: 0; padding: 0; list-style: none;
+}
+.btn-setting {
+  width: 150px; height: 150px; min-width: 0; min-height: 0; padding: 10px 6px;
+  flex-direction: column; gap: 2px;
+  font-size: var(--fs-ui); line-height: 1.2;
+}
+.btn-setting .motif { width: 46px; height: 46px; }
+.btn-setting__name { font-weight: 700; }
+.btn-setting__state { font-weight: 500; }
+.btn-setting[aria-pressed="false"] { background: var(--paper-2); }
+.btn-setting[aria-pressed="false"] .btn-setting__state { text-decoration: underline 3px var(--line); text-underline-offset: 6px; }
+
+/* よむ（読み上げ） */
+.btn-read { width: 132px; height: 132px; min-width: 0; min-height: 0; padding: 8px; flex-direction: column; gap: 0; font-size: var(--fs-ui); }
+.btn-read .motif { width: 60px; height: 60px; }
+.btn-read.is-speaking { background: var(--paper-2); box-shadow: 0 2px 0 var(--ink); transform: translateY(6px); }
+
+/* =====================================================================
+   上の帯（ステージ名・進み具合）
+   ===================================================================== */
+.topbar {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 190px;
+  z-index: var(--z-ui);
+  display: flex; align-items: center; gap: 40px;
+  padding: 24px 578px 16px 48px; /* 右は設定ボタンの場所 */
+}
+/* ステージの本の背（左上） */
+.stage-tab {
+  flex: none; width: 400px; height: 132px;
+  display: flex; align-items: center; justify-content: center;
+  border: 4px solid var(--ink); border-radius: 4px 14px 14px 4px;
+  box-shadow: inset 14px 0 0 rgba(0, 0, 0, .18), 0 6px 0 rgba(38, 48, 64, .35);
+}
+.stage-tab__slip {
+  min-width: 260px; max-width: 340px; padding: 4px 18px;
+  border: 3px solid var(--ink); border-radius: 2px;
+  text-align: center;
+  font-family: var(--font-head); font-weight: 600; font-size: 38px; line-height: 1.7;
+  font-feature-settings: "palt";
+}
+/* 進み具合 */
+.progress {
+  flex: 1; height: 132px;
+  display: flex; align-items: center; gap: 28px;
+  padding: 10px 28px;
+  border-radius: var(--r-strip);
+  box-shadow: var(--shadow-paper);
+}
+.progress__steps { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.step-chip {
+  width: 64px; height: 64px; display: grid; place-items: center;
+  border: 3px dashed var(--ink-soft); border-radius: 50%;
+  font-size: var(--fs-ui); font-weight: 700; color: var(--ink-soft);
+}
+.step-chip.is-now  { border: 5px solid var(--ink); color: var(--ink); width: 76px; height: 76px; font-size: 34px; }
+.step-chip.is-done { border: 3px solid var(--ink); background: var(--ink); color: var(--paper); }
+.progress__label { margin: 0; font-size: var(--fs-ui); line-height: 1.7; white-space: nowrap; }
+.progress__label b { font-size: 40px; font-weight: 700; }
+.dots { display: flex; gap: 12px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.dot { width: 26px; height: 26px; border: 3px solid var(--ink-soft); border-radius: 50%; }
+.dot.is-now  { width: 34px; height: 34px; border: 5px solid var(--ink); margin-top: -4px; }
+.dot.is-done { background: var(--ink); border-color: var(--ink); }
+
+/* =====================================================================
+   タイトル画面
+   ===================================================================== */
+.title-book {
+  position: absolute; left: 150px; top: 140px; width: 600px; height: 800px;
+  border: 5px solid var(--ink); border-radius: 6px 22px 22px 6px;
+  box-shadow: inset 30px 0 0 rgba(0, 0, 0, .2), 0 18px 0 #B3B6A6;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px;
+}
+.title-book__slip {
+  width: 420px; padding: 36px 24px; text-align: center;
+  border: 4px solid var(--ink); border-radius: 2px;
+  font-family: var(--font-head); font-weight: 600; font-size: 72px; line-height: 1.5;
+}
+.title-book__ribbon { position: absolute; top: -6px; right: 120px; width: 34px; height: 880px; background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 96%, 0 100%); z-index: -1; }
+.title-side { position: absolute; left: 880px; top: 300px; width: 900px; }
+.title-side__lead { font-size: var(--fs-body); margin: 0 0 56px; max-width: 26em; }
+
+/* =====================================================================
+   メニュー（本だな）
+   ===================================================================== */
+.menu-title { position: absolute; left: 60px; top: 40px; margin: 0; }
+/* 左: ことばの じてん の表紙（8さつ終わると完成） */
+.jiten-cover {
+  position: absolute; left: 80px; top: 210px; width: 520px; height: 800px;
+  border: 5px solid var(--ink); border-radius: 6px 20px 20px 6px;
+  box-shadow: inset 26px 0 0 rgba(0, 0, 0, .22), 0 16px 0 #B3B6A6;
+  padding: 56px 50px 40px 70px;
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
+  color: var(--paper);
+}
+.jiten-cover__slip { width: 100%; padding: 14px; text-align: center; color: var(--ink); border: 3px solid var(--ink); font-family: var(--font-head); font-weight: 600; font-size: 46px; line-height: 1.6; }
+.jiten-cover__slots { display: grid; grid-template-columns: repeat(4, 76px); gap: 18px; margin: 12px 0 0; padding: 0; list-style: none; }
+.cover-slot {
+  height: 96px; border-radius: 3px;
+  border: 3px dashed rgba(251, 248, 241, .65);
+  display: grid; place-items: center;
+  font-size: var(--fs-ui); font-weight: 700; color: rgba(251, 248, 241, .85);
+}
+.cover-slot.is-done { border: 3px solid var(--ink); color: var(--ink); }
+.jiten-cover__count { margin: auto 0 0; font-size: var(--fs-body); text-align: center; color: var(--paper); }
+.jiten-cover__count b { font-size: 48px; }
+.jiten-cover.is-complete .jiten-cover__slip { box-shadow: 0 0 0 8px rgba(232, 198, 106, .55); }
+
+/* 右: 本だな */
+.shelf {
+  position: absolute; left: 680px; top: 196px; width: 1180px; height: 860px;
+  padding: 24px 44px 0;
+  border: 24px solid var(--wood); border-bottom-width: 0; border-radius: 8px 8px 0 0;
+  background-color: var(--wood-back);
+  background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 3px, transparent 3px 41px, rgba(0, 0, 0, .08) 41px 43px, transparent 43px 97px);
+  box-shadow: inset 0 10px 18px rgba(0, 0, 0, .35);
+}
+.shelf::before { /* 木目 */
+  content: ""; position: absolute; inset: -24px -24px 0; pointer-events: none; border-radius: inherit;
+  background: repeating-linear-gradient(180deg, transparent 0 7px, rgba(0, 0, 0, .06) 7px 9px);
+  -webkit-mask: linear-gradient(#000 0 0) top/100% 24px no-repeat, linear-gradient(#000 0 0) left/24px 100% no-repeat, linear-gradient(#000 0 0) right/24px 100% no-repeat;
+          mask: linear-gradient(#000 0 0) top/100% 24px no-repeat, linear-gradient(#000 0 0) left/24px 100% no-repeat, linear-gradient(#000 0 0) right/24px 100% no-repeat;
+}
+.shelf__row {
+  position: relative; height: 380px; margin: 0 0 28px; padding: 0 0 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  list-style: none;
+}
+.shelf__row::after { /* 棚板 */
+  content: ""; position: absolute; left: -44px; right: -44px; bottom: -28px; height: 28px;
+  background: var(--wood);
+  background-image: repeating-linear-gradient(180deg, transparent 0 5px, rgba(0, 0, 0, .08) 5px 7px);
+  box-shadow: 0 -3px 0 #8E6845 inset, 0 6px 10px rgba(0, 0, 0, .35);
+}
+/* 面だしの本（表紙を見せて立てる） */
+.book {
+  position: relative; width: 230px; height: 300px; padding: 0; min-width: 0; min-height: 0;
+  border: 4px solid var(--ink); border-radius: 4px 14px 14px 4px;
+  box-shadow: inset 16px 0 0 rgba(0, 0, 0, .2), 0 4px 0 rgba(0, 0, 0, .35);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 14px;
+  padding-top: 18px; padding-left: 12px;
+  cursor: pointer;
+  transition: transform var(--t-mid) var(--ease-spring);
+}
+.book:hover { transform: translateY(-14px) rotate(-1deg); }
+.book:active { transform: translateY(-6px); }
+.book__num {
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: 3px solid var(--ink); border-radius: 50%;
+  font-size: var(--fs-ui); font-weight: 700; line-height: 1;
+}
+.book__slip {
+  width: 196px; height: 150px; padding: 6px 6px;
+  display: grid; place-content: center; text-align: center;
+  border: 3px solid var(--ink); border-radius: 2px;
+  font-family: var(--font-head); font-weight: 600; font-size: 32px; line-height: 1.75;
+  font-feature-settings: "palt";
+}
+/* おすすめ のしおり（紙のタブ。上につき出る） */
+.book__word { display: block; }
+.book__word.is-long { font-size: 28px; }  /* 4「ありがとう」を伝える だけ */
+.bookmark {
+  position: absolute; left: -6px; right: -6px; top: -70px; height: 66px;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid var(--ink); border-bottom: 0; border-radius: 10px 10px 0 0;
+  font-size: var(--fs-ui); font-weight: 700; line-height: 1.2; white-space: nowrap;
+  transform: rotate(-1.5deg); transform-origin: bottom center;
+  pointer-events: none;
+}
+.bookmark--recommend { background: var(--paper); color: var(--ink); }
+/* できた: 布のしおりひも ＋ 表紙の「できた」はんこ */
+.book.is-done::before {
+  content: ""; position: absolute; top: -40px; left: 44px; width: 26px; height: 120px;
+  background: var(--accent); border: 3px solid var(--ink); border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
+}
+.book__done {
+  position: absolute; right: -18px; top: -18px; width: 92px; height: 92px;
+  display: none; place-items: center;
+  border: 4px solid var(--accent); border-radius: 50%;
+  background: rgba(251, 248, 241, .94);
+  color: var(--accent); font-family: var(--font-head); font-weight: 600; font-size: var(--fs-ui); line-height: 1;
+  transform: rotate(-8deg);
+}
+.book.is-done .book__done { display: grid; }
+
+/* =====================================================================
+   ステージの表紙（タイトル）
+   ===================================================================== */
+.cover-book {
+  position: absolute; left: 120px; top: 210px; width: 620px; height: 820px;
+  border: 5px solid var(--ink); border-radius: 6px 22px 22px 6px;
+  box-shadow: inset 30px 0 0 rgba(0, 0, 0, .2), 0 18px 0 #B3B6A6;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
+  padding-left: 30px;
+}
+.cover-book__num { width: 72px; height: 72px; display: grid; place-items: center; border: 4px solid var(--ink); border-radius: 50%; font-size: 36px; font-weight: 700; line-height: 1; }
+.cover-book__ribbon { position: absolute; left: 150px; top: -10px; width: 34px; height: 900px; z-index: -1; background: var(--accent); border: 3px solid var(--ink); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 96%, 0 100%); }
+.cover-guide { position: absolute; right: 120px; bottom: 0; width: 260px; height: 300px; }
+.cover-book__slip {
+  width: 470px; padding: 40px 24px; text-align: center;
+  border: 4px solid var(--ink); border-radius: 2px;
+  font-family: var(--font-head); font-weight: 600; font-size: var(--fs-display); line-height: 1.55;
+  font-feature-settings: "palt";
+}
+.cover-side { position: absolute; left: 860px; top: 230px; width: 960px; }
+.cover-side__lead { margin: 0 0 36px; font-size: var(--fs-body); }
+.cover-steps { margin: 0 0 56px; padding: 0; list-style: none; display: grid; gap: 20px; }
+.cover-step {
+  display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 24px;
+  min-height: 124px; padding: 12px 28px;
+  border-left: 10px solid var(--book, var(--ink));
+  box-shadow: var(--shadow-paper);
+}
+.cover-step__no { width: 88px; height: 88px; display: grid; place-items: center; border: 4px solid var(--ink); border-radius: 50%; font-size: 40px; font-weight: 700; }
+.cover-step__text { font-size: var(--fs-body); }
+.cover-step.is-done .cover-step__no { background: var(--ink); color: var(--paper); }
+
+/* =====================================================================
+   問題の画面（おてほん・問題・せいかい・ヒント すべて同じ配置）
+   ===================================================================== */
+.q-strip {
+  position: absolute; left: 60px; top: 206px; width: 1800px; height: 210px;
+  display: grid; grid-template-columns: 132px 180px 1fr; align-items: center; gap: 32px;
+  padding: 18px 40px 18px 36px;
+  border-radius: var(--r-strip);
+  box-shadow: var(--shadow-paper);
+}
+.q-tag { /* 「おてほん」の札 */
+  position: absolute; left: 380px; top: -26px;
+  padding: 2px 22px; background: var(--tape);
+  font-size: var(--fs-ui); font-weight: 700; line-height: 1.6;
+  transform: rotate(-2deg);
+}
+.q-scene { /* 場面の絵（ステップ3）／相手と想像のふきだし（思いやり）／本の絵（ほか）*/
+  position: relative; width: 180px; height: 174px;
+  display: grid; place-items: center;
+  border: 3px solid var(--rule); border-radius: 4px; background: var(--paper-2);
+}
+.q-scene { color: var(--book, var(--ink-soft)); }
+.q-scene .motif { width: 150px; height: 150px; }
+.q-scene .motif--sub { position: absolute; right: -6px; bottom: -6px; width: 84px; height: 84px; }
+.q-text {
+  margin: 0;
+  font-size: var(--fs-question); line-height: 1.8; font-weight: 700;
+  word-break: keep-all; overflow-wrap: anywhere; text-wrap: balance;
+  max-height: 174px;
+}
+.q-text__scene { display: block; font-weight: 500; font-size: 38px; }
+
+/* 選択肢 */
+.choices {
+  position: absolute; left: 60px; top: 448px; width: 1800px; height: 424px;
+  display: flex; justify-content: center; align-items: stretch; gap: 60px;
+  margin: 0; padding: 0; list-style: none;
+}
+.choices[data-count="2"] { gap: 160px; }
+.choices > li { display: flex; }
+
+/* 図書カード */
+.card {
+  position: relative; width: 500px; height: 424px; padding: 30px 26px 22px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; align-items: stretch; gap: 10px;
+  border: 3px solid #CFC7B3; border-radius: var(--r-card);
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--nk, #D9D2BF), var(--nk, #D9D2BF));  /* 上の色帯 */
+  background-size: 100% 16px;
+  background-position: top left;
+  background-repeat: no-repeat;
+  box-shadow: var(--shadow-paper);
+  text-align: left; cursor: pointer;
+  transition: transform var(--t-mid) var(--ease-spring), border-color var(--t-fast), box-shadow var(--t-mid);
+}
+.card:hover { transform: translateY(-6px); border-color: var(--ink); }
+.card:active { transform: translateY(2px); }
+.card--neutral { --nk: #D9D2BF; } /* ステップ2・3: 答えが色でばれないよう、選ぶ前は色なし */
+.card__key { /* 数字キーの案内（1・2・3） */
+  position: absolute; left: 16px; top: 28px; width: 56px; height: 56px;
+  display: grid; place-items: center;
+  border: 3px solid var(--ink); border-radius: 50%; background: var(--paper);
+  font-size: var(--fs-ui); font-weight: 700; line-height: 1;
+}
+.card__nk { position: absolute; right: 18px; top: 28px; }
+.card__art {
+  position: relative; height: 218px; flex: none; display: grid; place-items: center;
+  border-bottom: 3px solid var(--rule);  /* 図書カードの罫線（1本だけ） */
+  color: var(--nk, var(--book, #9C8F70)); /* 絵の差し色 = なかま色 */
+}
+.card--neutral .card__art { color: var(--book, #9C8F70); }
+.card__art .motif--main { width: 200px; height: 200px; }
+.card--thought .card__art .motif--main { width: 150px; height: 150px; margin-top: 64px; } /* 雲の下に人物 */
+.card--thought .card__art .motif--sub  { width: 84px; height: 84px; }
+.card__art .motif--sub  { position: absolute; right: 50px; bottom: 0; width: 100px; height: 100px; }
+.card__art .motif--left { position: absolute; left: 50px; bottom: 0; width: 100px; height: 100px; }
+.card__text {
+  margin-top: 14px;
+  font-size: var(--fs-card); line-height: 1.78; font-weight: 700;
+  word-break: keep-all; overflow-wrap: anywhere; text-wrap: balance;
+  max-height: calc(2 * 1.78em); overflow: hidden;   /* 2行まで */
+}
+.card__text.is-2line { text-align: left; }
+.card__text.is-long { font-size: 30px; }           /* 2行でも入らないとき（めったにない） */
+
+/* 想像のふきだし（ステージ3 思いやり） */
+.thought {
+  position: absolute; z-index: 2;
+  padding: 18px 34px 22px;
+  min-width: 220px; max-width: 330px;
+  background: url("assets/thought-cloud.svg") center / 100% 100% no-repeat;
+  font-family: var(--font-head); font-weight: 600; font-size: var(--fs-ui); line-height: 1.7; text-align: center;
+  color: var(--ink);
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+.thought::before, .thought::after { /* 雲から相手へ続く、小さな丸 */
+  content: ""; position: absolute; border: 3px solid #5E5A80; border-radius: 50%; background: #fff;
+}
+.thought::before { width: 22px; height: 22px; left: 30px; bottom: -14px; }
+.thought::after  { width: 13px; height: 13px; left: 14px; bottom: -32px; }
+.card__thought { right: 14px; top: 26px; }
+.q-scene .thought { left: 120px; top: -12px; min-width: 300px; white-space: nowrap; max-width: none; }
+
+/* 申し訳ない の「ちくっ」（胸のあたりに小さく） */
+.chiku { position: absolute; width: 64px; height: 64px; color: var(--accent); }
+
+/* カードの状態 ---------------------------------------------------- */
+.card__mark { /* せいかいの二重まる（朱） */
+  position: absolute; right: 22px; top: 70px; width: 150px; height: 150px;
+  opacity: 0; transform: scale(.6) rotate(-12deg);
+  transition: opacity var(--t-mid), transform var(--t-mid) var(--ease-spring);
+  pointer-events: none;
+}
+.card__mark img { width: 100%; height: 100%; }
+.card__note { /* 「もういちど 見てみよう」の小さな札 */
+  position: absolute; left: 50%; bottom: -30px; transform: translateX(-50%) rotate(-1deg);
+  display: none; padding: 2px 22px; white-space: nowrap;
+  background: var(--paper); border: 3px dashed var(--ink-soft); border-radius: 4px;
+  font-size: var(--fs-ui); font-weight: 700; line-height: 1.6;
+}
+
+.card.is-correct { border: 5px solid var(--nk-line, var(--ink)); }
+.card.is-correct .card__mark { opacity: 1; transform: none; }
+/* まちがい: 色ではなく「点線のわく＋ことば」で知らせる。×・赤・ゆれは使わない */
+.card.is-retry { border: 4px dashed var(--ink-soft); }
+.card.is-retry .card__note { display: block; }
+/* ヒント（2回目）: 正解がゆっくりふくらみ、やわらかい光のわく。点滅しない */
+.card.is-hint {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 12px var(--hint), var(--shadow-paper);
+  border-color: var(--ink);
+  transition: transform var(--t-slow) ease-in-out, box-shadow var(--t-slow) ease-in-out;
+}
+/* ステップ1のヒント: まだのカードがゆっくり上下（2.4秒で1往復） */
+.card.is-float { animation: card-float 2.4s ease-in-out infinite; }
+@keyframes card-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+/* 2回目にしぼる: 外したカードはうすく、押せない */
+.card.is-out { opacity: .38; filter: grayscale(.8); pointer-events: none; box-shadow: none; }
+/* ステップ1: 集めたあと（じてんへ飛んだあとの跡） */
+.card.is-collected { opacity: .55; pointer-events: none; box-shadow: none; border-style: dashed; }
+.card.is-collected .card__mark { opacity: 1; transform: none; }
+/* おてほん: ガイドが押すカード */
+.card.is-guide-target { border-color: var(--ink); box-shadow: 0 0 0 10px rgba(38, 48, 64, .14), var(--shadow-paper); }
+/* じてんへ飛ぶ（CSSの動き。うごきをへらす では消えるだけ） */
+.card.is-flying {
+  transition: transform 700ms cubic-bezier(.5, 0, .3, 1), opacity 700ms ease-in;
+  transform: translate(var(--fly-x, 0), var(--fly-y, 0)) scale(.18) rotate(-6deg);
+  opacity: .2; pointer-events: none; z-index: 5;
+}
+
+/* おてほんのゆび（ガイドのカーソル） */
+.guide-pointer { position: absolute; width: 110px; height: 110px; z-index: 30; pointer-events: none; transition: left 900ms ease-in-out, top 900ms ease-in-out; }
+
+/* =====================================================================
+   下の帯: ガイド・ことば・つぎへ・じてん
+   ===================================================================== */
+.guidebar { position: absolute; left: 0; top: 892px; width: 1920px; height: 188px; }
+.guide {
+  position: absolute; left: 40px; bottom: 0; width: 200px; height: 231px;
+  object-fit: contain; object-position: bottom;
+}
+.guide-bubble {
+  position: absolute; left: 270px; top: 16px; width: 1040px; height: 150px; margin: 0;
+  display: flex; align-items: center; gap: 20px;
+  padding: 10px 36px;
+  border: 4px solid var(--ink); border-radius: 18px;
+  box-shadow: 0 6px 0 rgba(38, 48, 64, .25);
+  font-size: var(--fs-feedback); font-weight: 700; line-height: 1.75;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+.guide-bubble::before { /* しっぽ（ガイドへ） */
+  content: ""; position: absolute; left: -30px; top: 56px; width: 30px; height: 34px;
+  background: var(--ink); clip-path: polygon(100% 0, 0 55%, 100% 100%);
+}
+.guide-bubble::after {
+  content: ""; position: absolute; left: -22px; top: 61px; width: 24px; height: 24px;
+  background: var(--paper); clip-path: polygon(100% 0, 0 55%, 100% 100%);
+}
+.guide-bubble .motif { width: 64px; height: 64px; flex: none; color: var(--accent); }
+.guide-bubble.is-praise { border-color: var(--accent); }          /* ほめる: 朱のわく＋二重まるの絵 */
+.guide-bubble.is-retry  { border-style: dashed; }                  /* もういちど: 点線＋はてなの絵 */
+.footer-actions { position: absolute; right: 40px; top: 8px; display: flex; gap: 24px; }
+.btn-next { width: 260px; height: 150px; font-size: 36px; font-family: var(--font-head); font-weight: 600; }
+.btn-next.is-hidden { visibility: hidden; }        /* 場所は残す（配置を変えない） */
+.btn-jiten { width: 260px; height: 150px; padding: 10px 16px; gap: 14px; }
+.btn-jiten__label { font-size: var(--fs-ui); line-height: 1.3; text-align: left; }
+.btn-jiten__count { display: block; font-size: 34px; font-weight: 700; }
+.mini-grid { display: grid; grid-template-columns: repeat(5, 12px); gap: 3px; flex: none; }
+.mini-grid i { width: 12px; height: 12px; border: 2px solid var(--ink-soft); border-radius: 2px; }
+.mini-grid i.is-on { background: var(--ink); border-color: var(--ink); }
+
+/* =====================================================================
+   じてんのページ
+   ===================================================================== */
+.jiten-page {
+  position: absolute; left: 40px; top: 24px; width: 1840px; height: 1032px;
+  padding: 32px 60px 20px 110px;
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: -20px 0 0 -4px var(--jiten-cloth), 0 14px 0 #B3B6A6, 0 24px 30px -20px rgba(38, 48, 64, .5);
+}
+.jiten-page::before { /* とじしろ（本のノド） */
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 70px;
+  background: linear-gradient(90deg, rgba(38, 48, 64, .16), rgba(38, 48, 64, 0));
+  pointer-events: none;
+}
+.jiten-page__head { display: flex; flex-direction: column; justify-content: center; height: 150px; padding-right: 760px; }
+.jiten-page__title { margin: 0; font-family: var(--font-head); font-weight: 600; font-size: 50px; line-height: 1.55; white-space: nowrap; }
+.jiten-legend { display: flex; gap: 28px; margin: 0; padding: 0; list-style: none; white-space: nowrap; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: var(--fs-ui); line-height: 1.8; color: var(--nk-ink); font-weight: 700; }
+.legend-item .nk-mark { width: 30px; height: 30px; }
+.btn-close { position: absolute; right: 576px; top: 24px; width: 220px; height: 150px; font-size: 36px; font-family: var(--font-head); font-weight: 600; }
+
+.masu-grid {
+  display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 14px;
+  margin: 10px 0 0; padding: 0; list-style: none;
+}
+.masu-grid[data-count="20"] { --cols: 5; }
+.masu-grid[data-count="16"] { --cols: 4; }
+.masu-grid > li { display: flex; min-width: 0; }
+.masu {
+  position: relative; width: 100%; height: 168px; padding: 8px 14px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 4px;
+  border: 3px solid var(--nk-line); border-radius: 4px;
+  background: var(--nk-tint);
+  text-align: left; cursor: pointer;
+  box-shadow: 0 3px 0 rgba(38, 48, 64, .18);
+}
+.masu__head { display: flex; justify-content: space-between; align-items: flex-start; height: 52px; flex: none; }
+.masu__art { width: 54px; height: 54px; color: var(--nk); }
+.masu__art .motif { width: 54px; height: 54px; }
+.masu__head .nk-mark { width: 32px; height: 32px; }
+.masu__text { margin-top: auto; font-size: var(--fs-ui); line-height: 1.64; font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; text-wrap: balance; max-height: calc(2 * 1.64em); overflow: hidden; }
+.masu.is-empty { background: var(--paper-2); border-style: dashed; cursor: default; box-shadow: none; }
+.masu.is-empty .masu__q { margin: auto; font-family: var(--font-head); font-weight: 600; font-size: 56px; line-height: 1; color: var(--ink-soft); }
+.masu.is-new { box-shadow: 0 0 0 8px var(--hint); }        /* いま入ったマス */
+.masu.is-glow { box-shadow: 0 0 0 10px var(--nk); }        /* まとめで色ごとにゆっくり光らせる */
+.masu.is-picked { outline: 6px solid var(--accent); outline-offset: 4px; } /* ふり返りで選んだ */
+.jiten-page__meaning {
+  position: absolute; left: 110px; right: 60px; bottom: 18px;
+  margin: 0; padding-top: 6px; border-top: 3px solid var(--line);
+  font-size: 36px; line-height: 1.85; font-weight: 700;
+}
+
+/* =====================================================================
+   ステップのおわり（まとめ）: 紙を1まい重ねる
+   ===================================================================== */
+.sheet-overlay {
+  position: absolute; inset: 0; z-index: var(--z-overlay);
+  display: none; place-items: center;
+  background: rgba(198, 202, 185, .72);
+}
+.sheet-overlay.is-active { display: grid; }
+.sheet {
+  position: relative; width: 1240px; min-height: 560px; padding: 70px 80px 60px 330px;
+  box-shadow: 0 16px 0 #B3B6A6, 0 30px 40px -24px rgba(38, 48, 64, .6);
+}
+.sheet__stamp { position: absolute; left: 60px; top: 70px; width: 230px; height: 230px; }
+.sheet__title { margin: 0 0 18px; font-family: var(--font-head); font-weight: 600; font-size: var(--fs-h1); line-height: 1.6; }
+.sheet__text { margin: 0 0 40px; font-size: 36px; line-height: 1.85; font-weight: 700; }
+.sheet__swatches { display: flex; gap: 24px; margin: 0 0 40px; padding: 0; list-style: none; }
+
+/* =====================================================================
+   ふり返り
+   ===================================================================== */
+.review-page {
+  position: absolute; left: 60px; top: 206px; width: 1800px; height: 850px;
+  display: grid; grid-template-columns: 960px 1fr; gap: 60px;
+  padding: 44px 60px 40px 70px;
+  box-shadow: var(--shadow-paper);
+}
+.review__title { margin: 0 0 12px; font-family: var(--font-head); font-weight: 600; font-size: var(--fs-h1); line-height: 1.6; }
+.review__meaning { margin: 0 0 26px; padding: 14px 24px; border-left: 10px solid var(--book, var(--ink)); background: var(--paper-2); font-size: 34px; line-height: 1.85; font-weight: 700; }
+.checklist { margin: 0 0 24px; padding: 0; list-style: none; display: grid; gap: 10px; }
+.check-item { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 16px; font-size: var(--fs-body); line-height: 1.75; }
+.check-item .motif { width: 52px; height: 52px; color: var(--accent); }
+.review__last { margin: 0; font-family: var(--font-head); font-weight: 600; font-size: 36px; line-height: 1.8; }
+.review__right { display: flex; flex-direction: column; gap: 20px; }
+.review__stamps { height: 220px; display: flex; gap: 20px; align-items: center; justify-content: center; } /* 3Dのスタンプが並ぶ場所 */
+.review__stamps img { width: 160px; height: 160px; }
+.review__stamps.is-3d img { visibility: hidden; } /* 3Dのスタンプが出るときは2Dの絵をかくす（場所は残す） */
+.sheet__stamp.is-3d { visibility: hidden; }
+.review__pick-label { margin: 0; font-size: var(--fs-body); font-weight: 700; }
+.review__pick { flex: 1; display: grid; place-items: center; }
+.review__pick .card { width: 460px; height: 380px; }
+.review__actions { position: absolute; left: 70px; bottom: 40px; display: flex; gap: 24px; }
+
+/* =====================================================================
+   うごきをへらす（設定 または OS の設定）
+   ===================================================================== */
+.stage[data-motion="less"] *, .stage[data-motion="less"] *::before, .stage[data-motion="less"] *::after {
+  animation: none !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}
+.stage[data-motion="less"] .book:hover,
+.stage[data-motion="less"] .card:hover,
+.stage[data-motion="less"] .btn:hover { transform: none; }
+.stage[data-motion="less"] .card.is-hint { transform: none; }
+.stage[data-motion="less"] .card.is-float { box-shadow: 0 0 0 10px var(--hint), var(--shadow-paper); } /* ゆれのかわりに光のわく */
+.stage[data-motion="less"] .card.is-flying { transform: none; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .stage *, .stage *::before, .stage *::after { animation: none !important; transition-duration: 1ms !important; }
+  .stage .card.is-hint { transform: none; }
+  .stage .card.is-float { box-shadow: 0 0 0 10px var(--hint), var(--shadow-paper); }
+  .stage .card.is-flying { transform: none; opacity: 0; }
+}

@@ -539,7 +539,7 @@ rt {
 .thought::before { width: 22px; height: 22px; left: 30px; bottom: -14px; }
 .thought::after  { width: 13px; height: 13px; left: 14px; bottom: -32px; }
 .card__thought { right: 14px; top: 26px; }
-.q-scene .thought { left: 150px; top: 50%; transform: translateY(-58%); min-width: 0; max-width: 276px; white-space: normal; }
+.q-scene .thought { left: 128px; top: 50%; transform: translateY(-58%); min-width: 0; max-width: 306px; padding: 18px 24px 22px; white-space: normal; } /* 9字まで1行、それより長いと ことばの切れ目で2行 */
 /* 想像の雲があるときは、場面の箱を横に広げて雲を箱の中に入れる（帯の文・ふりがなにかぶらない） */
 .q-strip:has(.q-scene .thought) { grid-template-columns: 132px 440px 1fr; }
 .q-scene:has(.thought) { width: 440px; justify-items: start; padding-left: 4px; }

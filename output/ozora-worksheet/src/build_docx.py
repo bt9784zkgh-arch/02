@@ -129,7 +129,12 @@ def page(doc, p, no, first):
         t = b["t"]
         if t == "step":
             n += 1
-            para(doc, f"{'❶❷❸❹❺'[n-1]} ［{b['kind']}］ {b['text']}", 13, True, col, before=6)
+            if n > 1:
+                sep = para(doc, "", before=10, after=0)
+                pPr = sep._p.get_or_add_pPr()
+                bdr = parse_xml(f'<w:pBdr {NS}><w:top w:val="dashed" w:sz="8" w:space="1" w:color="D3DBE5"/></w:pBdr>')
+                pPr.append(bdr)
+            para(doc, f"{'❶❷❸❹❺'[n-1]} ［{b['kind']}］ {b['text']}", 13, True, col, before=4 if n > 1 else 8, after=6)
         elif t == "form":
             tb = table(doc, len(b["rows"]), 2, [46, 134])
             for i, r in enumerate(b["rows"]):
@@ -226,7 +231,7 @@ def page(doc, p, no, first):
         elif t == "answer":
             para(doc, "〔{先生|せんせい}用〕" + b["text"], 9.5, color="#7a8592", before=6)
         elif t == "reflect":
-            para(doc, "", before=0, after=0)
+            para(doc, "", before=10, after=0)
             tb = table(doc, 2, 3, [62, 88, 30])
             cell_text(tb.cell(0, 0), "ふりかえり　きょうの {気持|きも}ちに ○", 10.5, True)
             cell_text(tb.cell(0, 1), "{感|かん}じた こと", 10.5, True)

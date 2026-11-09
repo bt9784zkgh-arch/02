@@ -139,7 +139,17 @@ def page(p, no):
 </section>'''
     cname, col, soft = CATS[p["cat"]]
     st = {"n": 0}
-    body = "".join(block(b, st, p["cat"]) for b in p["blocks"])
+    groups, cur = [], []
+    for b in p["blocks"]:
+        if b["t"] in ("step", "reflect") and cur:
+            groups.append(cur); cur = []
+        cur.append(b)
+    groups.append(cur)
+    body = ""
+    for g in groups:
+        inner = "".join(block(b, st, p["cat"]) for b in g)
+        cls = "sec" if g[0]["t"] == "step" else ("sec0" if g[0]["t"] != "reflect" else "")
+        body += f'<div class="{cls}">{inner}</div>' if cls else '<div class="spacer"></div>' + inner
     stars = "".join(icon("star") for _ in range(3))
     return f'''<section class="page" style="--c:{col};--s:{soft}">
 <header><div class="badge">{icon(p["icon"])}<span>{cname}</span></div>

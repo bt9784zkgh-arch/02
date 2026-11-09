@@ -1,0 +1,175 @@
+@page { size: A4; margin: 0; }
+:root { --ink:#2d3b4e; --paper:#fffdf8; --line:#9fb0c4; --c:#3f6fb0; --s:#e9f1fb; }
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background:#ddd; }
+body { font-family: "BIZ UDGothic", "IPAGothic", sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+ruby { position: relative; display: inline-block; text-indent: 0; line-height: 1.2; }
+ruby rt { position: absolute; left: 50%; transform: translateX(-50%); top: -0.72em; font-size: .48em; font-weight: normal; letter-spacing: -0.02em; white-space: nowrap; line-height: 1; }
+svg.ico { width: 1em; height: 1em; vertical-align: -0.15em; }
+
+.page { width: 210mm; height: 297mm; padding: 11mm 13mm 9mm; background: var(--paper); position: relative; overflow: hidden;
+  page-break-after: always; display: flex; flex-direction: column; margin: 0 auto 8mm; font-size: 12.5pt; line-height: 1.95; }
+@media print { .page { margin: 0; } html, body { background: none; } }
+
+/* ---------- 見出し ---------- */
+header { display: flex; gap: 5mm; align-items: stretch; margin-bottom: 4mm; }
+.badge { width: 23mm; flex: none; border: 2.5px solid var(--c); border-radius: 4mm 6mm 4mm 7mm; background: var(--s);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: "Zen Maru Gothic"; font-weight: 700; color: var(--c); font-size: 11pt; line-height: 1.2; }
+.badge svg { width: 13mm; height: 13mm; margin-bottom: 1mm; }
+.ht { flex: 1; }
+h1 { font-family: "Klee One", "Zen Maru Gothic"; font-weight: 600; font-size: 22pt; margin: 0; line-height: 1.6;
+  border-bottom: 3px solid var(--c); padding-bottom: 0; }
+.goal { margin-top: 2mm; font-size: 12.5pt; line-height: 1.9; }
+.goal .lbl { display: inline-block; background: var(--c); color: #fff; font-family: "Zen Maru Gothic"; font-weight: 700; border-radius: 2mm; padding: 0 2.5mm; margin-right: 2.5mm; font-size: 10.5pt; line-height: 1.7; }
+
+main { flex: 1; display: flex; flex-direction: column; gap: 2.6mm; }
+
+/* ---------- ステップ ---------- */
+.step { display: flex; align-items: center; gap: 2.5mm; margin-top: 1.5mm; }
+.step .num { flex: none; width: 9mm; height: 9mm; border-radius: 50%; background: var(--c); color: #fff; font-family: "Zen Maru Gothic"; font-weight: 700;
+  font-size: 15pt; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.step .kind { flex: none; display: inline-flex; align-items: center; gap: 1mm; border: 2px solid var(--c); color: var(--c); border-radius: 5mm; padding: 0 2.5mm;
+  font-family: "Zen Maru Gothic"; font-weight: 700; font-size: 10.5pt; line-height: 1.8; background: #fff; }
+.step .kind svg { width: 5mm; height: 5mm; }
+.step .stxt { font-weight: bold; font-size: 13pt; }
+
+/* ---------- 書く表 ---------- */
+table { border-collapse: collapse; width: 100%; }
+.form th, .pick th { width: 46mm; text-align: left; background: var(--s); font-weight: bold; padding: 1mm 3mm; border: 1.5px solid var(--line); font-size: 12pt; }
+.form td { border: 1.5px solid var(--line); height: 12mm; background: #fff; }
+.pick td { border: 1.5px solid var(--line); padding: 1.5mm 3mm; background: #fff; }
+.opt { display: inline-block; margin-right: 6mm; padding: 0 2mm; font-size: 13pt; }
+.opt + .opt::before { content: "・"; margin-right: 6mm; margin-left: -6mm; color: #aab; }
+
+.model { border: 2px dashed var(--c); border-radius: 3mm; padding: 2mm 4mm; background: #fff; font-size: 12.5pt; }
+.model .tag, .note { font-family: "Zen Maru Gothic"; font-weight: 700; }
+.model .tag { display: block; color: var(--c); font-size: 10.5pt; line-height: 1.6; }
+
+.hint { display: flex; gap: 3mm; align-items: flex-start; background: #fffbea; border: 2px solid #e8c95b; border-radius: 3mm 5mm 3mm 6mm; padding: 2mm 4mm; font-size: 12pt; line-height: 1.85; }
+.hint svg.hb { flex: none; width: 13mm; height: 13mm; margin-top: 1mm; }
+.hint b { font-family: "Zen Maru Gothic"; color: #a77a00; }
+.note { text-align: center; color: var(--c); font-size: 12.5pt; }
+.talk { display: flex; align-items: center; gap: 2.5mm; font-weight: bold; color: var(--c); }
+.talk svg { width: 8mm; height: 8mm; }
+
+/* ---------- カード・仕分け ---------- */
+.cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2.5mm; }
+.cards.small { grid-template-columns: repeat(5, 1fr); }
+.card { position: relative; background: #fff; border: 2px solid var(--ink); border-radius: 2mm; padding: 6mm 2mm 2mm; text-align: center; font-size: 11.5pt; line-height: 1.7;
+  box-shadow: 1.2mm 1.2mm 0 var(--s); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.card.letter svg { width: 11mm; height: 11mm; }
+.card .cn, .rate .cn { font-family: "Zen Maru Gothic"; font-weight: 700; color: var(--c); font-size: 14pt; }
+.card .cn { position: absolute; top: .5mm; left: 2mm; line-height: 1.4; }
+.card:nth-child(odd) { transform: rotate(-1deg); } .card:nth-child(even) { transform: rotate(1deg); }
+.cards.small .card { padding: 5.5mm 1.5mm 1.5mm; font-size: 11pt; min-height: 19mm; justify-content: center; }
+.sort { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.box { border: 2.5px solid var(--c); border-radius: 4mm; background: #fff; padding: 2mm 3mm; display: flex; flex-direction: column; }
+.box > svg { width: 11mm; height: 11mm; position: absolute; }
+.box { position: relative; }
+.box .bl { font-weight: bold; text-align: center; padding-left: 10mm; font-size: 12.5pt; color: var(--c); }
+.box .bw { height: 30mm; border-top: 1.5px dashed var(--line); margin-top: 1mm; }
+
+/* ---------- イライラ表 ---------- */
+.rate th { font-weight: normal; font-size: 10pt; line-height: 1.3; padding-bottom: 1mm; width: 22mm; }
+.rate th:first-child { width: auto; }
+.rate th svg { width: 11mm; height: 11mm; }
+.rate td { border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); padding: 1.3mm 2mm; text-align: center; background: #fff; }
+.rate td.it { text-align: left; font-size: 12.5pt; }
+.rate td.it .cn { margin-right: 2mm; }
+.ring { display: inline-block; width: 9mm; height: 9mm; border: 2px solid var(--line); border-radius: 50%; vertical-align: middle; background: #fff; }
+.ring.sm { width: 7mm; height: 7mm; flex: none; }
+
+.checks { display: grid; gap: 2mm 5mm; }
+.checks.c2 { grid-template-columns: 1fr 1fr; } .checks.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.chk { display: flex; align-items: center; gap: 2.5mm; background: #fff; border: 1.5px solid var(--line); border-radius: 2mm; padding: 1mm 3mm; font-size: 12pt; line-height: 1.8; }
+.sq { flex: none; display: inline-block; width: 6.5mm; height: 6.5mm; border: 2px solid var(--ink); border-radius: 1mm; background: #fff; }
+
+/* ---------- 場面 ---------- */
+.scene { display: flex; gap: 4mm; align-items: center; background: var(--s); border-radius: 4mm; padding: 3mm 5mm; }
+.scene .sart svg { width: 24mm; height: 24mm; }
+.scene .stx { flex: 1; font-size: 13pt; }
+.mail { margin-top: 1.5mm; background: #fff; border: 2px solid var(--ink); border-radius: 3mm; padding: 1.5mm 3.5mm; font-size: 11.5pt; line-height: 1.85; }
+.mail .mh { font-size: 9.5pt; color: #6a7686; line-height: 1.6; border-bottom: 1px solid #ccd; margin-bottom: 1mm; }
+.mail .mh svg { width: 4mm; height: 4mm; }
+
+.bubbles { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm 5mm; }
+.bub { position: relative; display: flex; align-items: center; gap: 2.5mm; background: #fff; border: 2px solid var(--ink); border-radius: 5mm; padding: 2mm 4mm; font-size: 12.5pt; }
+.bub::after { content: ""; position: absolute; left: 9mm; bottom: -2.4mm; width: 4mm; height: 4mm; background: #fff; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(45deg); }
+.faces3 { display: flex; justify-content: space-around; }
+.fc { display: flex; flex-direction: column; align-items: center; font-size: 11.5pt; line-height: 1.6; }
+.fc svg { width: 15mm; height: 15mm; }
+
+.choices { display: grid; gap: 2mm; }
+.ch { display: flex; align-items: center; gap: 3mm; background: #fff; border: 1.5px solid var(--line); border-radius: 2mm; padding: 1mm 4mm; font-size: 12.5pt; }
+.ch .cn { font-family: "Zen Maru Gothic"; font-weight: 700; color: var(--c); }
+
+.signs { display: flex; gap: 4mm; align-items: stretch; }
+.signs ul { list-style: none; margin: 0; padding: 2mm 3mm; flex: 1.4; background: #fff; border: 1.5px solid var(--line); border-radius: 2mm; }
+.signs li { display: flex; gap: 2.5mm; align-items: center; font-size: 12pt; }
+.stop { flex: 1; background: #fbe6e1; border: 2.5px solid #d9563b; border-radius: 3mm; padding: 2mm 3mm; font-weight: bold; font-size: 12.5pt; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.oct { background: #d9563b; color: #fff; font-family: "Zen Maru Gothic"; font-weight: 700; padding: 0 3mm; border-radius: 1.5mm; letter-spacing: .1em; margin-bottom: 1mm; line-height: 1.6; }
+
+/* ---------- 氷山 ---------- */
+.iceberg { border-radius: 4mm; overflow: hidden; border: 2px solid var(--c); }
+.iceberg .above { background: #fff; padding: 2mm 4mm 1mm; text-align: center; position: relative; }
+.iceberg .w { display: inline-block; font-family: "Klee One"; font-weight: 600; font-size: 17pt; margin: 0 4mm; color: #b4472f; }
+.iceberg .below { background: linear-gradient(#cfe1f5, #9fc0e6); border-top: 3px solid var(--c); padding: 1mm 4mm 2mm; text-align: center; }
+.iceberg .lab { font-size: 10pt; color: #567; line-height: 1.6; }
+.iceberg .q { display: inline-block; width: 30mm; height: 9mm; margin: 0 3mm; border: 2px dashed #fff; border-radius: 2mm; color: #fff; font-weight: bold; line-height: 9mm; }
+.wordbank { display: flex; flex-wrap: wrap; gap: 2mm 3mm; }
+.wb { background: #fff; border: 2px solid var(--line); border-radius: 6mm; padding: 0 4mm; font-size: 12.5pt; line-height: 2.1; }
+.pairs th { font-size: 10.5pt; color: #567; font-weight: normal; line-height: 1.6; }
+.pairs td { padding: 1mm 2mm; }
+.pairs .pl { width: 34%; background: #fff; border: 1.5px solid var(--line); font-weight: bold; text-align: center; font-size: 13pt; }
+.pairs .ar { width: 8%; text-align: center; font-size: 15pt; color: var(--c); }
+.pairs .pr { border-bottom: 1.5px solid var(--ink); height: 11mm; }
+
+/* ---------- 言いかえ ---------- */
+.convert { display: flex; flex-direction: column; gap: 2mm; }
+.cv { display: grid; grid-template-columns: 1fr 9mm 1.3fr; align-items: center; }
+.cv .bad { background: #f1f1ee; border-radius: 2mm; padding: 1mm 3mm; color: #66707c; font-size: 12pt; }
+.cv .arr { text-align: center; color: var(--c); font-size: 15pt; font-weight: bold; }
+.cv .good { background: var(--s); border: 2px solid var(--c); border-radius: 2mm; padding: 1mm 3mm; font-weight: bold; font-size: 12.5pt; }
+
+.lines .ln, .rwrite .ln { border-bottom: 1.5px solid var(--line); height: 11mm; display: flex; align-items: flex-end; font-size: 12pt; color: #6a7686; padding-left: 1mm; line-height: 1.8; }
+
+/* ---------- じゅんばん ---------- */
+.order { display: flex; flex-direction: column; gap: 2mm; }
+.od { display: flex; align-items: center; gap: 3mm; background: #fff; border: 1.5px solid var(--line); border-radius: 2mm; padding: 1.2mm 4mm; font-size: 13pt; }
+.paren { font-weight: bold; color: var(--c); font-size: 14pt; flex: none; }
+.answer { transform: rotate(180deg); font-size: 9.5pt; color: #7a8592; text-align: center; line-height: 1.7; border-top: 1px dashed #bbc; padding-top: 1mm; }
+
+/* ---------- ふりかえり ---------- */
+.reflect { margin-top: auto; border: 2.5px solid var(--ink); border-radius: 4mm; padding: 3.5mm 4mm 2mm; background: #fff; position: relative; }
+.rh { position: absolute; top: -3.4mm; left: 5mm; background: var(--paper); padding: 0 2mm; font-family: "Zen Maru Gothic"; font-weight: 700; font-size: 11.5pt; line-height: 1.4; }
+.rrow { display: grid; grid-template-columns: 70mm 1fr 22mm; gap: 4mm; align-items: start; }
+.rq { font-size: 9.5pt; color: #567; line-height: 2.3; }
+.rfaces { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.rfaces .rq { width: 100%; }
+.rf { display: flex; flex-direction: column; align-items: center; width: 22mm; white-space: nowrap; line-height: 1.3; }
+.rf svg { width: 11mm; height: 11mm; }
+.rf small { font-size: 8pt; text-align: center; }
+.rwrite .ln { height: 9.5mm; }
+.stamp { width: 19mm; height: 19mm; border: 2px dashed var(--line); border-radius: 50%; }
+
+footer { display: flex; justify-content: space-between; align-items: center; font-size: 9.5pt; color: #6a7686; margin-top: 2.5mm; line-height: 1.6; }
+footer svg.ico { width: 8mm; height: 8mm; vertical-align: -1.6mm; }
+
+/* ---------- 表紙 ---------- */
+.cover { align-items: center; background: linear-gradient(#eaf2fb 0, var(--paper) 55%); }
+.cover .sky { position: absolute; inset: auto 0 0 0; height: 80mm; opacity:.6 } .cover .sky{display:none}
+.cover .waves { width: 100%; height: 80mm; }
+.ctitle { margin-top: 26mm; font-family: "Klee One"; font-weight: 600; font-size: 44pt; letter-spacing: .12em; position: relative; line-height: 1.7; }
+.csub { font-family: "Zen Maru Gothic"; font-weight: 700; font-size: 15pt; color: #3f6fb0; position: relative; }
+.mihon { display: inline-block; margin-left: 3mm; border: 2px solid #d9563b; color: #d9563b; border-radius: 2mm; padding: 0 2mm; font-size: 11pt; line-height: 1.7; transform: rotate(-4deg); }
+.cbird svg { width: 70mm; height: 70mm; margin: 6mm 0 2mm; }
+.cname { display: flex; align-items: flex-end; gap: 4mm; width: 150mm; font-family: "Zen Maru Gothic"; font-weight: 700; font-size: 18pt; }
+.cname .nl { flex: 1; border-bottom: 2.5px solid var(--ink); height: 14mm; }
+.howto { margin-top: auto; width: 100%; border: 2.5px solid #3f6fb0; border-radius: 5mm; padding: 4mm 6mm 5mm; background: #fff; }
+.hh { font-family: "Zen Maru Gothic"; font-weight: 700; font-size: 14pt; color: #3f6fb0; text-align: center; }
+.hrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; margin: 2mm 0 3mm; }
+.hw { display: flex; flex-direction: column; align-items: center; text-align: center; background: #f4f8fd; border-radius: 3mm; padding: 2mm; line-height: 1.6; }
+.hw svg { width: 14mm; height: 14mm; }
+.hw b { font-family: "Zen Maru Gothic"; font-size: 14pt; }
+.hw small { font-size: 10pt; }
+.promise { text-align: center; font-size: 13pt; font-weight: bold; background: #fffbea; border-radius: 3mm; padding: 2mm; }

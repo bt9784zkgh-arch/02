@@ -2,8 +2,11 @@
 # 同じ内容データから、先生が直せる Word 版を作る（ふりがなは Word のルビ機能）
 import re, sys
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from content import PAGES, CATS
-from build_html import merge
+from content import CATS
+from content_all import PAGES
+from build_html import merge, DATA
+from furigana import auto
+from docx.shared import Mm as _Mm
 from docx import Document
 from docx.shared import Pt, Mm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -28,7 +31,7 @@ def add(p, text, size=12.5, bold=False, color=None):
     sz = int(size * 2)
     rsz = max(10, int(sz * 0.5))
     col = color.lstrip("#") if color else None
-    text = merge(text)
+    text = merge(auto(text))
     for part in re.split(r"(\{[^{}]+\|[^{}]+\})", text):
         if not part:
             continue
@@ -106,7 +109,7 @@ def page(doc, p, no, first):
     if p.get("cover"):
         para(doc, "", after=30)
         para(doc, "{大空|おおぞら}に{翔|かけ}け", 40, True, align=WD_ALIGN_PARAGRAPH.CENTER)
-        para(doc, "こころと くらしの ワークブック（{見本|みほん}）", 15, True, "#3f6fb0", WD_ALIGN_PARAGRAPH.CENTER, after=60)
+        para(doc, "こころと くらしの ワークブック", 15, True, "#3f6fb0", WD_ALIGN_PARAGRAPH.CENTER, after=60)
         para(doc, "なまえ　＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿", 18, True, align=WD_ALIGN_PARAGRAPH.CENTER, after=50)
         para(doc, "このワークの つかいかた", 14, True, "#3f6fb0", WD_ALIGN_PARAGRAPH.CENTER)
         t = table(doc, 2, 4, [45, 45, 45, 45])
@@ -134,7 +137,7 @@ def page(doc, p, no, first):
                 pPr = sep._p.get_or_add_pPr()
                 bdr = parse_xml(f'<w:pBdr {NS}><w:top w:val="dashed" w:sz="8" w:space="1" w:color="D3DBE5"/></w:pBdr>')
                 pPr.append(bdr)
-            para(doc, f"{'❶❷❸❹❺'[n-1]} ［{b['kind']}］ {b['text']}", 13, True, col, before=4 if n > 1 else 8, after=6)
+            para(doc, f"{'❶❷❸❹❺❻❼❽❾❿'[n-1]} ［{b['kind']}］ {b['text']}", 13, True, col, before=4 if n > 1 else 8, after=6)
         elif t == "form":
             tb = table(doc, len(b["rows"]), 2, [46, 134])
             for i, r in enumerate(b["rows"]):
@@ -180,6 +183,11 @@ def page(doc, p, no, first):
             tb = table(doc, (len(items) + k - 1) // k, k, [180 / k] * k)
             for i, x in enumerate(items):
                 cell_text(tb.cell(i // k, i % k), "□ " + x, 12)
+        elif t == "scene" and b.get("img"):
+            tb = table(doc, 1, 2, [30, 150]); shade(tb.cell(0, 1), soft)
+            tb.cell(0, 0).paragraphs[0].add_run().add_picture(DATA + b["img"], height=_Mm(24))
+            cell_text(tb.cell(0, 1), b["text"], 12.5)
+            para(doc, "", before=0, after=0)
         elif t == "scene":
             txt = b["text"] + (("\n\n📩 メール：" + b["msg"]) if b.get("msg") else "")
             boxed(doc, txt, soft)
@@ -228,6 +236,56 @@ def page(doc, p, no, first):
             tb = table(doc, len(b["items"]), 1, [180])
             for i, x in enumerate(b["items"]):
                 cell_text(tb.cell(i, 0), "（　　）　" + x, 13)
+        elif t == "cards2":
+            tb = table(doc, (len(b["items"]) + 1) // 2, 2, [90, 90])
+            for i, (a, d) in enumerate(b["items"]):
+                c = tb.cell(i // 2, i % 2)
+                cell_text(c, a, 12.5, True, col); para(c, d, 11.5, before=0)
+        elif t == "rings":
+            tb = table(doc, len(b["labels"]), 2, [60, 120])
+            for i, l in enumerate(b["labels"]):
+                cell_text(tb.cell(i, 0), l, 12, True, col); shade(tb.cell(i, 0), soft)
+                tb.rows[i].height = Mm(16 if i else 10)
+        elif t == "grid":
+            n = b["n"]; tb = table(doc, n, n, [6.5] * n)
+            for r in tb.rows: r.height = Mm(6.5)
+        elif t == "drawbox":
+            tb = table(doc, 1, 1, [180]); tb.rows[0].height = Mm(b["h"])
+        elif t == "list":
+            for i, x in enumerate(b["items"]):
+                para(doc, f"{i+1}. " + x, 12, before=3)
+        elif t == "imgs":
+            k = len(b["files"]); caps = b.get("caps") or [None] * k
+            tb = table(doc, 1, k, [180 / k] * k)
+            for i, (f, c) in enumerate(zip(b["files"], caps)):
+                cl = tb.cell(0, i); cl.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                if b.get("num"): add(cl.paragraphs[0], MARU[i] + " ", 13, True, col)
+                cl.paragraphs[0].add_run().add_picture(DATA + f, height=_Mm(min(b["h"], 52)))
+                if c: para(cl, c, 10.5, align=WD_ALIGN_PARAGRAPH.CENTER, before=0)
+        elif t == "timetable":
+            hs = b["hours"]; half = (len(hs) + 1) // 2
+            tb = table(doc, half, 4, [14, 76, 14, 76])
+            for i in range(half):
+                cell_text(tb.cell(i, 0), f"{hs[i]}時", 11, True); shade(tb.cell(i, 0), soft)
+                if i + half < len(hs):
+                    cell_text(tb.cell(i, 2), f"{hs[i+half]}時", 11, True); shade(tb.cell(i, 2), soft)
+                tb.rows[i].height = Mm(11)
+        elif t == "table":
+            ncol = len(b["rows"][0]); w = b.get("w") or [100 / ncol] * ncol
+            hashead = any(b["head"])
+            tb = table(doc, len(b["rows"]) + (1 if hashead else 0), ncol, [180 * x / sum(w) for x in w])
+            o = 0
+            if hashead:
+                for j, x in enumerate(b["head"]):
+                    cell_text(tb.cell(0, j), x, 10.5, True, align=WD_ALIGN_PARAGRAPH.CENTER); shade(tb.cell(0, j), soft)
+                o = 1
+            for i, r in enumerate(b["rows"]):
+                for j, x in enumerate(r):
+                    if x == "○":
+                        cell_text(tb.cell(i + o, j), "◯", 13, color="#9fb0c4", align=WD_ALIGN_PARAGRAPH.CENTER)
+                    elif x:
+                        cell_text(tb.cell(i + o, j), x, 11, j == 0)
+                if b.get("h"): tb.rows[i + o].height = Mm(b["h"])
         elif t == "answer":
             para(doc, "〔{先生|せんせい}用〕" + b["text"], 9.5, color="#7a8592", before=6)
         elif t == "reflect":

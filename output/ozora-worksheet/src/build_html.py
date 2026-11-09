@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import re, sys, html
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from content import PAGES, CATS
+from content import CATS
+from content_all import PAGES
+from furigana import auto
+DATA = "/tmp/claude-0/-home-user/7a334d41-ec37-5369-a54e-810601a7b1cf/scratchpad/data_small/"
 from icons import icon, svg, ICONS
 
 def merge(s):
@@ -12,7 +15,7 @@ def merge(s):
 
 def R(s):
     """{漢字|かんじ} -> <ruby>。改行は<br>"""
-    s = merge(s)
+    s = merge(auto(s))
     s = html.escape(s, quote=False)
     s = re.sub(r"\{([^|{}]+)\|([^{}]+)\}", r"<ruby>\1<rt>\2</rt></ruby>", s)
     return '<span class="t">' + s.replace("\n", "<br>") + '</span>'
@@ -70,7 +73,8 @@ def block(b, st, cat):
         extra = ""
         if b.get("msg"):
             extra = f'<div class="mail"><div class="mh">{icon("phone")}メール</div>{R(b["msg"])}</div>'
-        return (f'<div class="scene"><div class="sart">{icon(b["svg"])}</div>'
+        art = f'<img src="file://{DATA}{b["img"]}">' if b.get("img") else icon(b["svg"])
+        return (f'<div class="scene"><div class="sart">{art}</div>'
                 f'<div class="stx">{R(b["text"])}{extra}</div></div>')
     if t == "bubbles":
         it = "".join(f'<div class="bub"><span class="ring sm"></span><span>{R(x)}</span></div>' for x in b["items"])
@@ -117,6 +121,51 @@ def block(b, st, cat):
                 f'<div class="rwrite"><div class="rq">{R("{感|かん}じた こと")}</div>'
                 f'<div class="ln first">{R("わたしは、")}</div><div class="ln"></div></div>'
                 f'<div class="rsign"><div class="rq">{R("{先生|せんせい}から")}</div><div class="stamp"></div></div></div></div>')
+
+    if t == "cards2":
+        it = "".join(f'<div class="c2"><b>{R(a)}</b><div>{R(d)}</div></div>' for a, d in b["items"])
+        return f'<div class="cards2">{it}</div>'
+    if t == "rings":
+        labs = b["labels"]
+        circles = "".join(f'<div class="rg r{i}"><span class="rl">{R(l)}</span></div>' for i, l in reversed(list(enumerate(labs))))
+        return f'<div class="rings">{circles}</div>'
+    if t == "grid":
+        n = b["n"]
+        cells = "".join('<i></i>' for _ in range(n * n))
+        return f'<div class="grid" style="--n:{n}">{cells}</div>'
+    if t == "drawbox":
+        return f'<div class="drawbox" style="height:{b["h"]}mm"></div>'
+    if t == "list":
+        it = "".join(f'<li><span class="ln-n">{i+1}</span>{R(x)}</li>' for i, x in enumerate(b["items"]))
+        return f'<ol class="story">{it}</ol>'
+    if t == "imgs":
+        caps = b.get("caps") or [None] * len(b["files"])
+        it = ""
+        for i, (f, c) in enumerate(zip(b["files"], caps)):
+            num = f'<span class="cn">{MARU[i]}</span>' if b.get("num") else ""
+            cap = f'<div class="cap">{R(c)}</div>' if c else ""
+            it += f'<figure>{num}<img src="file://{DATA}{f}" style="height:{b["h"]}mm">{cap}</figure>'
+        return f'<div class="imgs">{it}</div>'
+    if t == "timetable":
+        hs = b["hours"]
+        half = (len(hs) + 1) // 2
+        def col(hh):
+            return "".join(f'<tr><th>{h}時</th><td></td></tr>' for h in hh)
+        return (f'<div class="tt"><table class="tbl">{col(hs[:half])}</table>'
+                f'<table class="tbl">{col(hs[half:])}</table></div>')
+    if t == "table":
+        w = b.get("w")
+        cg = "".join(f'<col style="width:{x}%">' for x in w) if w else ""
+        def cell(x):
+            if x == "○": return '<span class="ring sm"></span>'
+            return R(x) if x else ""
+        head = ""
+        if any(b["head"]):
+            head = "<tr>" + "".join(f"<th>{R(x)}</th>" for x in b["head"]) + "</tr>"
+        h = b.get("h")
+        st_ = f' style="height:{h}mm"' if h else ""
+        rows = "".join("<tr" + st_ + ">" + "".join(f"<td>{cell(x)}</td>" for x in r) + "</tr>" for r in b["rows"])
+        return f'<table class="tbl {b.get("cls","")}"><colgroup>{cg}</colgroup>{head}{rows}</table>'
     raise ValueError(t)
 
 def page(p, no):
@@ -124,7 +173,7 @@ def page(p, no):
         return f'''<section class="page cover">
 <div class="sky">{svg('<path d="M10 70c20-10 40-10 60 0s40 10 60 0" stroke="#bcd3ee" stroke-width="2"/><path d="M0 40c25-8 50-8 75 0s50 8 75 0" stroke="#d7e5f5" stroke-width="2"/>', vb="0 0 150 100", cls="waves")}</div>
 <div class="ctitle">{R("{大空|おおぞら}に{翔|かけ}け")}</div>
-<div class="csub">{R("こころと くらしの ワークブック")}<span class="mihon">{R("{見本|みほん}")}</span></div>
+<div class="csub">{R("こころと くらしの ワークブック")}</div>
 <div class="cbird">{icon("bird")}</div>
 <div class="cname"><span>なまえ</span><div class="nl"></div></div>
 <div class="howto"><div class="hh">{R("このワークの つかいかた")}</div>

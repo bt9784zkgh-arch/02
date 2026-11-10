@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おおぞら こころの たび</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ---- 組立担当の つけたし（style.css は デザイン担当のもの。ここは 動きの ための すこしだけ） ---- */
+  .topbar { position: relative; z-index: 45; }          /* タイトルの紙や 3D の下に かくれない */
+  .progress.is-empty { visibility: hidden; }             /* タイトル・ふり返りでは 中身なし（場所は のこす） */
+  .tool-btn[aria-disabled="true"] { opacity: .45; cursor: default; }
+  .sheet { position: relative; }                          /* テープを 紙に くっつける */
+  .sheet .tape { left: 64px; top: -22px; }
+  .sheet-body { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .sheet-head { display: flex; align-items: center; gap: 32px; }
+  .sheet-pic { width: 300px; height: 300px; justify-self: center; }
+  .sheet .goal-card { position: static; margin-top: 8px; }
+  /* ヒントで ちゅうもく（選択肢 いがいの 絵・マーク・下線） */
+  .stage .is-hinted:not(.choice) {
+    outline: 6px solid var(--hint-line); outline-offset: 6px;
+    background-color: var(--hint-bg); border-radius: 14px;
+  }
+  .warn-line.is-hinted { outline-offset: 2px; }
+  .choice.is-bigger { transform: rotate(0) scale(1.05) !important; }
+  /* おてほん: 水の下から カードが うかぶ */
+  .demo-rise { opacity: 0; transform: translateY(150px) !important; transition: transform 600ms ease-out, opacity 600ms ease-out; }
+  .demo-rise.is-up { opacity: 1; transform: rotate(0) !important; }
+  .choices--1 { grid-template-columns: minmax(0, 640px); justify-content: center; }
+  /* ステップ2: カードは ドラッグでも うごかせる（クリックでも おなじ） */
+  .sort-card.can-drag { cursor: grab; touch-action: none; user-select: none; }
+  .sort-card.is-dragging { cursor: grabbing; transition: none !important; z-index: 30; }
+  .figure--goal { justify-content: flex-start; }
+  .figure--goal .sort-card { max-width: 1180px; }
+  .scene-mark { flex: none; width: 120px; height: 120px; }
+  .choice-marks { display: flex; gap: 12px; }
+  .hint-title { margin-bottom: 10px; }
+  .flightpath { max-width: 820px; }                       /* 右はしは 3D の鳥の 場所 */
+  .has-3d .title-bird { visibility: hidden; }              /* 3D の鳥が とぶときは 絵の鳥を かくす */
+  /* タイトル: ちずを すこし下げて、右上の ツールと 鳥・ステップ3 が 重ならないように */
+  .route { top: 150px; bottom: auto; height: 936px; }
+  .title-bird { right: auto; left: 680px; top: 0; width: 160px; height: 160px; }
+</style>
+</head>
+<body>
+<main class="stage" id="stage" data-step="1" data-screen="title">
+  <div id="stage3d" class="stage3d" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="progress is-empty" id="progress">
+      <p class="progress-label" id="progressLabel"></p>
+      <ol class="flightpath" id="flightpath" aria-hidden="true"></ol>
+    </div>
+    <nav class="tools" aria-label="せってい">
+      <button type="button" class="tool-btn" id="btnSound" aria-pressed="false"><img src="assets/icon-sound-on.svg" alt="">おと<small>あり</small></button>
+      <button type="button" class="tool-btn" id="btnMotion" aria-pressed="false"><img src="assets/icon-motion.svg" alt="">うごき<small>ふつう</small></button>
+      <button type="button" class="tool-btn" id="btnBack"><img src="assets/icon-back.svg" alt="">もどる</button>
+    </nav>
+  </header>
+
+  <div class="screen" id="screen"></div>
+
+  <noscript><p style="grid-row:2/5;font-size:40px">JavaScript を オンに すると あそべます。</p></noscript>
+</main>
+
+<script src="lib/three.min.js"></script>
+<script src="motion3d.js"></script>
+<script src="bgm.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

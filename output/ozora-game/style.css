@@ -1,0 +1,782 @@
+/* =========================================================
+   おおぞら こころの たび — style.css
+   テーマ: 「たびの てちょう」— 紙の鳥が、ワークブック「大空に翔け」の
+   紙の上を とんでいく。紙・青い手描き線・はなまるスタンプ。
+   基準 1920×1080。.stage を --fit 倍に縮める（1280×720 → 0.667）。
+   クラス名の一覧は design.md の「8. クラス名一覧」を見る。
+   ========================================================= */
+
+/* ---------- フォント（fonts/ に同梱。OFL） ---------- */
+@font-face { font-family: "BIZ UDGothic"; font-weight: 400; font-display: swap;
+  src: local("BIZ UDGothic"), local("BIZUDGothic-Regular"), url("fonts/BIZUDGothic-Regular.woff2") format("woff2"); }
+@font-face { font-family: "BIZ UDGothic"; font-weight: 700; font-display: swap;
+  src: local("BIZ UDGothic Bold"), local("BIZUDGothic-Bold"), url("fonts/BIZUDGothic-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Zen Maru Gothic"; font-weight: 500; font-display: swap;
+  src: local("Zen Maru Gothic Medium"), local("ZenMaruGothic-Medium"), url("fonts/ZenMaruGothic-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Zen Maru Gothic"; font-weight: 700; font-display: swap;
+  src: local("Zen Maru Gothic Bold"), local("ZenMaruGothic-Bold"), url("fonts/ZenMaruGothic-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Klee One"; font-weight: 600; font-display: swap;
+  src: local("Klee One SemiBold"), local("KleeOne-SemiBold"), url("fonts/KleeOne-SemiBold.woff2") format("woff2"); }
+
+/* ---------- 色・文字・寸法 ---------- */
+:root {
+  /* 紙とインク */
+  --paper:        #fffdf8;   /* 背景の紙 */
+  --paper-edge:   #f3ecdd;   /* 紙のふち・ステージの外 */
+  --card:         #ffffff;   /* カードの紙 */
+  --ink:          #2d3b4e;   /* 文字・線（紙の上で 11.2:1） */
+  --ink-soft:     #5d6876;   /* 小さい説明・くものはこ（5.6:1） */
+  --rule:         #9fb0c4;   /* 点線・すすみぐあいの線（かざり） */
+
+  /* 分野の色（ワークブックと同じ） */
+  --kokoro:       #3f6fb0;   /* こころ＝青。ステップ1・タイトル・鳥（文字にも可 5.0:1） */
+  --kokoro-tint:  #e9f1fb;
+  --kokoro-ink:   #2f5a94;   /* 青のうす地の上の文字 */
+  --kotoba:       #d9782d;   /* ことば＝オレンジ。ステップ2・手のはこ（線・面だけ 3.1:1） */
+  --kotoba-tint:  #fdeee0;
+  --kotoba-ink:   #a85216;   /* オレンジの文字は これ（5.3:1） */
+  --kurashi:      #3f8f5f;   /* くらし＝緑。ステップ3（線・面だけ 3.9:1） */
+  --kurashi-tint: #e8f3ec;
+  --kurashi-ink:  #2f7a4d;   /* 緑の文字は これ（5.2:1） */
+
+  /* ヒント（黄色い枠＋鳥） */
+  --hint-bg:      #fffbea;
+  --hint-line:    #e8c95b;
+  --hint-ink:     #7a5a00;   /* 6.2:1 */
+
+  /* 朱（はなまる・スタンプだけに使う） */
+  --shu:          #b8462a;   /* 5.2:1 */
+
+  /* くものはこ（グレー） */
+  --cloud:        #5d6876;
+  --cloud-tint:   #eef0f2;
+
+  /* 水（ステップ1の ひょうざん） */
+  --water:        #cfe1f5;
+  --water-deep:   #b9d3ef;
+
+  /* いまのステップの色（.stage[data-step] で切りかわる） */
+  --accent:       var(--kokoro);
+  --accent-tint:  var(--kokoro-tint);
+  --accent-ink:   var(--kokoro-ink);
+
+  /* 文字 */
+  --font-body:  "Zen Maru Gothic", "BIZ UDGothic", "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+  --font-ud:    "BIZ UDGothic", "BIZ UDPGothic", "Zen Maru Gothic", "Meiryo", sans-serif;
+  --font-hand:  "Klee One", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+
+  --fs-small:    28px;   /* いちばん小さい文字（ラベル・ふりがなの元の字） */
+  --fs-body:     32px;   /* 本文・選択肢 */
+  --fs-question: 44px;   /* 問題文 */
+  --fs-word:     64px;   /* 水の上の ことば・大きい見出し */
+  --fs-title:    96px;   /* タイトル */
+  --lh-body:     1.75;
+  --lh-question: 1.8;
+
+  /* 寸法（1920×1080 のときの px） */
+  --gutter:   48px;      /* 画面の左右のよはく */
+  --gap:      32px;      /* となりのボタンとの あいだ（24px以上） */
+  --btn:      120px;     /* ボタンの最小サイズ */
+  --line:     3px;       /* カードの線 */
+  --line-bold: 5px;
+  /* かどは わざと 4つとも ちがう（手で切った紙） */
+  --r-card:   14px 22px 16px 26px;
+  --r-btn:    18px 26px 20px 30px;
+  --r-box:    10px 10px 28px 34px;
+  --shadow:   6px 7px 0 var(--accent-tint);   /* やわらかい影は使わず、紙を重ねた ずれ */
+  --shadow-up: 9px 11px 0 var(--accent-tint);
+
+  /* 動き */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --t-quick: 160ms;
+  --t-soft:  320ms;
+
+  /* 縮める倍率（JSで上書き。下の @media は JS がないときの予備） */
+  --fit: 1;
+}
+@media (max-width: 1900px), (max-height: 1060px) { :root { --fit: .9; } }
+@media (max-width: 1700px), (max-height: 950px)  { :root { --fit: .8; } }
+@media (max-width: 1520px), (max-height: 850px)  { :root { --fit: .7; } }
+@media (max-width: 1340px), (max-height: 750px)  { :root { --fit: .66; } }
+
+/* ---------- ページの土台 ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--paper-edge);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+/* 分かち書き: スペースの所でだけ 行を かえる（ことばの 途中で 切らない）。
+   keep-all で かな・漢字の あいだの 改行を止め、長すぎて入らない ときだけ anywhere で折る。 */
+.stage {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+ruby, rt { white-space: nowrap; }
+button { font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ---------- ステージ（16:9 の紙） ---------- */
+.stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--fit));
+  transform-origin: center center;
+  background-color: var(--paper);
+  background-image: url("assets/paper-grain.svg");
+  background-size: 240px 240px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 152px 136px 1fr 300px 160px;  /* 進み具合 / 問題 / 絵 / 選択肢 / 下の帯 */
+  grid-template-areas: "top" "question" "figure" "choices" "foot";
+  row-gap: 16px;
+  padding: 0 var(--gutter) 24px;
+  box-shadow: 0 0 0 1px #e4dccb;
+}
+.stage[data-step="1"] { --accent: var(--kokoro);  --accent-tint: var(--kokoro-tint);  --accent-ink: var(--kokoro-ink); }
+.stage[data-step="2"] { --accent: var(--kotoba);  --accent-tint: var(--kotoba-tint);  --accent-ink: var(--kotoba-ink); }
+.stage[data-step="3"] { --accent: var(--kurashi); --accent-tint: var(--kurashi-tint); --accent-ink: var(--kurashi-ink); }
+
+/* 3D（motion3d.js）を のせる層。押せない。 */
+.stage3d, #stage3d {
+  position: absolute; inset: 0; z-index: 40;
+  pointer-events: none;
+}
+
+/* 画面の切りかえ: 1度に1つだけ見せる */
+.screen { display: contents; }
+.screen[hidden] { display: none !important; }
+
+/* ---------- ふりがな ---------- */
+/* rt を上に うかせて、行の高さを 広げない。行間は 1.75 以上なので重ならない。 */
+ruby {
+  position: relative;
+  display: ruby;            /* inline-block にすると、その前後で ことばが 切れてしまう */
+  line-height: 1;
+  text-indent: 0;
+  ruby-position: over;
+}
+ruby rt {
+  position: absolute;
+  left: 50%; bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: .08em;
+  font-family: var(--font-ud);
+  font-size: .46em;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: inherit;
+  text-align: center;
+}
+rp { display: none; }
+/* ふりがなを けす設定（先生用。いまは使わない） */
+.no-ruby rt { visibility: hidden; }
+
+/* =========================================================
+   1. 上の帯: 進み具合（とぶ みち）とツール
+   ========================================================= */
+.topbar {
+  grid-area: top;
+  display: flex; align-items: center; gap: var(--gap);
+  padding-top: 16px;
+}
+.progress { flex: 1; display: flex; align-items: center; gap: 36px; min-width: 0; }
+.progress-label {
+  flex: none;
+  font-family: var(--font-body); font-weight: 700;
+  font-size: var(--fs-small); line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.progress-label b { font-size: 40px; color: var(--accent-ink); margin: 0 .1em; }
+
+/* とぶ みち: 点線の上に ○ がならび、鳥が いまの○の上に とまる */
+.flightpath {
+  position: relative;
+  flex: 1; max-width: 900px; height: 96px;
+  display: flex; align-items: center; justify-content: space-between;
+  list-style: none; margin: 0; padding: 0 30px;
+}
+.flightpath::before {   /* 鉛筆で引いた 点線 */
+  content: ""; position: absolute; left: 30px; right: 30px; top: 50%;
+  border-top: 4px dashed var(--rule);
+  transform: rotate(-.6deg);
+}
+.flightpath-dot {
+  position: relative; z-index: 1;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--paper);
+  border: 4px solid var(--rule);
+}
+.flightpath-dot.is-done {   /* おわった問題: 色＋チェックの形 */
+  background: var(--accent); border-color: var(--accent);
+}
+.flightpath-dot.is-done::after {
+  content: ""; position: absolute; left: 10px; top: 4px;
+  width: 10px; height: 18px;
+  border: solid #fff; border-width: 0 5px 5px 0;
+  transform: rotate(40deg);
+}
+.flightpath-dot.is-now {    /* いまの問題: 大きい○＋上に鳥 */
+  width: 52px; height: 52px;
+  border-color: var(--accent); border-width: 6px;
+  background: var(--accent-tint);
+}
+.flightpath-bird {
+  position: absolute; z-index: 2;
+  width: 88px; height: 88px;
+  top: -30px; left: 0;
+  transform: translateX(-50%) scaleX(-1);   /* 右を むく。JS で left を いまの○に合わせる */
+  transition: left 600ms var(--ease-spring);
+  pointer-events: none;
+}
+
+.tools { flex: none; display: flex; gap: 24px; }
+.tool-btn {
+  width: var(--btn); height: var(--btn);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  padding: 0;
+  background: var(--card);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--r-btn);
+  box-shadow: 4px 5px 0 #e4dccb;
+  font-family: var(--font-body); font-weight: 700; font-size: 26px; line-height: 1.25;
+  cursor: pointer;
+}
+.tool-btn img { width: 46px; height: 46px; margin-bottom: 2px; }
+.tool-btn small { font-size: 21px; font-weight: 700; color: var(--ink-soft); line-height: 1.2; }
+.tool-btn[aria-pressed="true"] { background: var(--kokoro-tint); }
+
+/* =========================================================
+   2. 問題の帯（どの画面も 同じ場所）
+   ========================================================= */
+.qband {
+  grid-area: question;
+  position: relative;
+  display: flex; align-items: center; gap: var(--gap);
+  padding-left: 8px;
+}
+.read-btn {
+  flex: none;
+  width: var(--btn); height: var(--btn);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: var(--accent-tint);
+  border: var(--line) solid var(--ink);
+  border-radius: 50% 46% 52% 48%;
+  font-family: var(--font-body); font-weight: 700; font-size: 26px; line-height: 1.2;
+  cursor: pointer;
+}
+.read-btn img { width: 56px; height: 56px; }
+.question {
+  margin: 0;
+  font-family: var(--font-ud); font-weight: 700;
+  font-size: var(--fs-question); line-height: var(--lh-question);
+  color: var(--ink);
+  padding-top: .3em;           /* ふりがなの ぶん */
+  border-bottom: 4px solid var(--accent);
+  border-image: none;
+}
+/* マスキングテープ（おてほん・せつめい の しるし） */
+.tape {
+  position: absolute; left: 168px; top: -14px; z-index: 2;
+  padding: 0 26px 0 22px;
+  background: rgba(232, 201, 91, .55);
+  font-family: var(--font-hand); font-weight: 600; font-size: var(--fs-small); line-height: 1.4;
+  color: var(--ink);
+  transform: rotate(-4deg);
+  clip-path: polygon(2% 0, 98% 4%, 100% 50%, 97% 100%, 1% 96%, 0 50%);
+}
+
+/* =========================================================
+   3. 絵の場所（ステップごとに中身がかわる）
+   ========================================================= */
+.figure {
+  grid-area: figure;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 0;
+}
+
+/* ---- ステップ1: ひょうざん ---- */
+/* .iceberg は 絵 と 選択肢 の2段に またがる 背景。水面が 2つのさかい目。 */
+.iceberg {
+  grid-row: figure / choices; grid-column: 1;
+  position: relative; z-index: 0;
+  margin: 0 calc(var(--gutter) * -1);
+  background: url("assets/iceberg.svg") center top / 1920px 560px no-repeat;
+  pointer-events: none;
+}
+.figure--iceberg, .choices--water { z-index: 1; }
+.figure--iceberg { align-items: flex-start; padding-top: 4px; }
+.choices--water { padding-top: 28px; }
+.choices--water .choice-text { font-size: 44px; line-height: 1.6; }
+.word-bubble {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding: 10px 56px 14px;
+  background: var(--card);
+  border: var(--line-bold) solid var(--shu);
+  border-radius: 46px 52px 44px 56px;
+  font-family: var(--font-hand); font-weight: 600;
+  font-size: var(--fs-word); line-height: 1.3;
+  color: var(--ink);
+}
+.word-bubble::after {    /* しっぽ */
+  content: ""; position: absolute; left: 50%; bottom: -26px;
+  width: 40px; height: 40px;
+  background: var(--card);
+  border-right: var(--line-bold) solid var(--shu);
+  border-bottom: var(--line-bold) solid var(--shu);
+  transform: translateX(-50%) rotate(45deg) skew(6deg, 6deg);
+}
+.word-bubble--warm { border-color: var(--kurashi); }
+.word-bubble--warm::after { border-color: var(--kurashi); }
+.water-label {   /* 「水の 上」「水の 下」の小さい札 */
+  position: absolute;
+  font-family: var(--font-body); font-weight: 700; font-size: var(--fs-small); line-height: 1.4;
+  color: var(--kokoro-ink);
+  background: var(--paper); padding: 2px 16px;
+  border: 2px solid var(--kokoro); border-radius: 8px 12px 9px 14px;
+}
+.water-label--up   { left: 0; bottom: 30px; }
+.water-label--down { left: 0; bottom: -46px; background: var(--water); }
+
+/* 正解のあと、ことばと気持ちカードを むすぶ線（JS で SVG を置く） */
+.link-line { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: visible; }
+.link-line path { fill: none; stroke: var(--kokoro); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 2 14; }
+
+/* ---- ステップ2: しわけるカード ---- */
+.sort-card {
+  display: flex; align-items: center; gap: 36px;
+  min-width: 640px; max-width: 1240px;
+  padding: 16px 56px 16px 28px;
+  background: var(--card);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  transform: rotate(-.8deg);
+  font-family: var(--font-ud); font-weight: 700;
+  font-size: 40px; line-height: 1.8;
+  position: relative;
+}
+.sort-card img { flex: none; width: 168px; height: 168px; }
+.sort-card::before {   /* テープでとめた紙 */
+  content: ""; position: absolute; left: 50%; top: -18px;
+  width: 140px; height: 36px; transform: translateX(-50%) rotate(3deg);
+  background: rgba(232, 201, 91, .55);
+}
+.sort-card.is-flying { transition: transform 520ms var(--ease-spring), opacity 520ms; }
+/* めあてカード（第5問） */
+.goal-card {
+  position: absolute; right: 0; top: 8px;
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 24px 8px 12px;
+  background: var(--kurashi-tint);
+  border: var(--line) solid var(--kurashi); border-radius: 12px 18px 14px 20px;
+  font-weight: 700; font-size: var(--fs-small); line-height: 1.6;
+}
+.goal-card img { width: 80px; height: 80px; }
+.goal-card b { color: var(--kurashi-ink); }
+
+/* ---- ステップ3: 場面 ---- */
+.scene {
+  display: flex; align-items: center; gap: 48px;
+  width: 100%; height: 100%;
+  padding: 16px 56px 16px 24px;
+  background: var(--kurashi-tint);
+  border-radius: 22px 30px 24px 36px;
+}
+.scene-pic { flex: none; width: 240px; height: 240px; }
+.scene-text {
+  margin: 0;
+  font-family: var(--font-ud); font-weight: 700;
+  font-size: 38px; line-height: 1.85;
+  max-width: 34em;
+}
+/* あやしいサイン（黄色の下線。色だけでなく 太い線の形で） */
+.warn-line {
+  text-decoration: underline;
+  text-decoration-color: var(--hint-line);
+  text-decoration-thickness: 10px;
+  text-underline-offset: 6px;
+  text-decoration-skip-ink: none;
+}
+
+/* ---- おてほん用: ゆびの カーソル ---- */
+.hand-cursor {
+  position: absolute; z-index: 30;
+  width: 120px; height: 120px;
+  pointer-events: none;
+  transition: left 900ms ease-in-out, top 900ms ease-in-out, transform 200ms;
+}
+.hand-cursor.is-press { transform: scale(.88); }
+
+/* =========================================================
+   4. 選択肢（どの画面も 同じ場所・同じ並び）
+   ========================================================= */
+.choices {
+  grid-area: choices;
+  display: grid; gap: 48px;
+  align-items: stretch;
+  list-style: none; margin: 0; padding: 0 0 8px;
+}
+.choices--2 { grid-template-columns: repeat(2, minmax(0, 640px)); justify-content: center; }
+.choices--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.choice {
+  position: relative;
+  display: flex; align-items: center; gap: 28px;
+  width: 100%; min-height: var(--btn);
+  padding: 28px 36px 28px 28px;
+  background: var(--card);
+  border: var(--line) solid var(--ink);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  font-family: var(--font-ud); font-weight: 700;
+  font-size: var(--fs-body); line-height: var(--lh-body);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--t-quick) ease-out, box-shadow var(--t-quick) ease-out;
+}
+.choice:nth-child(odd)  { transform: rotate(-.5deg); }
+.choice:nth-child(even) { transform: rotate(.5deg); }
+.choice:hover { transform: translateY(-4px) rotate(0); box-shadow: var(--shadow-up); }
+.choice:active { transform: translateY(2px); box-shadow: 2px 3px 0 var(--accent-tint); }
+
+.choice-key {   /* キーボードの番号 1・2・3 */
+  position: absolute; left: -16px; top: -20px;
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff;
+  font-family: var(--font-body); font-weight: 700; font-size: 30px; line-height: 1;
+  border: 3px solid var(--paper);
+}
+.stage[data-step="2"] .choice-key { background: var(--kotoba-ink); }
+.stage[data-step="3"] .choice-key { background: var(--kurashi-ink); }
+.choice-pic { flex: none; width: 136px; height: 136px; }
+.choices--3 .choice { flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: 28px 32px; }
+.choices--3 .choice-pic { width: 88px; height: 88px; }
+.choices--3 .choice-text { flex: none; }
+.choice-text { flex: 1; }
+.choice-mark {   /* 先生・大人などのマーク（文の前に置く小さな丸） */
+  flex: none;
+  width: 88px; height: 88px; border-radius: 50%;
+  background: var(--paper); border: 3px solid var(--kurashi);
+  padding: 6px;
+}
+
+/* ---- ステップ2: はこ（選択肢の一種） ---- */
+.sort-box {
+  flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px;
+  padding: 0 24px 24px;
+  border-width: var(--line-bold);
+  border-top-style: dashed;           /* 上が あいている はこ */
+  border-radius: var(--r-box);
+  text-align: center;
+}
+.sort-box--hand  { border-color: var(--kotoba); background: var(--kotoba-tint); box-shadow: 6px 7px 0 #f6dcc4; }
+.sort-box--cloud { border-color: var(--cloud);  background: var(--cloud-tint);  box-shadow: 6px 7px 0 #dde1e6; }
+.sort-box .choice-pic { width: 120px; height: 120px; margin-top: -40px; }
+.sort-box-label { font-size: var(--fs-body); line-height: 1.6; }
+.sort-box--hand  .sort-box-label b { color: var(--kotoba-ink); }
+.sort-box--cloud .sort-box-label b { color: var(--cloud); }
+.sort-box.is-wiggle { animation: wiggle 900ms ease-in-out 1; }
+
+/* ---- 選択肢の ようす ---- */
+/* 正解: 線が太く＋はなまる＋「せいかい」のことば（色だけにしない） */
+.choice.is-correct {
+  border-width: 6px; border-color: var(--accent-ink);
+  background: var(--card);
+  transform: rotate(0) scale(1.02);
+}
+.sort-box.is-correct { background: var(--accent-tint); }
+.choice.is-correct::after {
+  content: ""; position: absolute; right: -28px; top: -40px;
+  width: 128px; height: 128px;
+  background: url("assets/hanamaru.svg") center / contain no-repeat;
+  transform: rotate(-8deg);
+}
+.choice-badge {     /* 「せいかい」「もういちど」の 札。JS で中のことばを入れる */
+  position: absolute; left: 50%; top: -26px; transform: translateX(-50%);
+  padding: 2px 22px;
+  background: var(--paper);
+  border: 3px solid currentColor; border-radius: 10px 14px 11px 16px;
+  font-family: var(--font-body); font-weight: 700; font-size: var(--fs-small); line-height: 1.4;
+  white-space: nowrap;
+}
+.choice.is-correct .choice-badge { color: var(--shu); }
+/* まちがい: 責めない。点線の わく＋鳥の「もういちど」。赤・×は使わない */
+.choice.is-retry {
+  border-style: dashed; border-color: var(--ink-soft);
+  box-shadow: none;
+}
+.choice.is-retry .choice-badge { color: var(--ink-soft); }
+/* 2回まちがえたら: 候補を しぼる（消さずに うすく。押せない） */
+.choice.is-out {
+  opacity: .38;
+  box-shadow: none;
+  cursor: default;
+  pointer-events: none;
+  filter: grayscale(.6);
+}
+/* ヒントで ちゅうもく: 黄色い太い わく（ゆれない） */
+.choice.is-hinted {
+  outline: 8px solid var(--hint-line);
+  outline-offset: 6px;
+}
+/* 3回目: 正解を ゆっくり光らせる（2秒で1回。点滅ではない） */
+.choice.is-guide {
+  outline: 8px solid var(--hint-line);
+  outline-offset: 6px;
+  animation: guide 2s ease-in-out infinite;
+}
+/* 答えたあと 押せない */
+.choice.is-locked { cursor: default; pointer-events: none; }
+
+/* キーボードの フォーカス（どの押せるものも 同じ） */
+:focus { outline: none; }
+:focus-visible,
+.choice:focus-visible,
+.btn:focus-visible,
+.tool-btn:focus-visible,
+.read-btn:focus-visible {
+  outline: 6px solid var(--ink) !important;
+  outline-offset: 8px;
+  box-shadow: 0 0 0 14px var(--hint-bg), var(--shadow);
+}
+
+/* =========================================================
+   5. 下の帯: 鳥のことば／ヒント／ほめことば ＋ つぎへボタン
+   ========================================================= */
+.footer {
+  grid-area: foot;
+  display: flex; align-items: center; gap: var(--gap);
+}
+.talk, .hint, .praise {
+  flex: 1; min-width: 0; min-height: 132px;
+  display: flex; align-items: center; gap: 24px;
+  padding: 10px 32px 10px 20px;
+  font-size: var(--fs-body); line-height: 1.7;
+}
+.talk img, .hint img, .praise img { flex: none; width: 112px; height: 112px; }
+.talk { font-weight: 700; }
+.hint {
+  background: var(--hint-bg);
+  border: 4px solid var(--hint-line);
+  border-radius: 12px 20px 14px 24px;
+  font-family: var(--font-ud); font-weight: 700;
+}
+.hint-title {
+  display: block;
+  font-family: var(--font-body); font-weight: 700; font-size: var(--fs-small); line-height: 1.3;
+  color: var(--hint-ink);
+}
+.praise {
+  font-family: var(--font-hand); font-weight: 600;
+  font-size: 40px; line-height: 1.6;
+  color: var(--ink);
+}
+.footer-spacer { flex: 1; }   /* 帯が空のときの場所とり（ボタンの位置を動かさない） */
+
+/* ボタン */
+.btn {
+  flex: none;
+  min-width: 280px; min-height: var(--btn);
+  display: inline-flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 0 40px;
+  border: var(--line) solid var(--ink);
+  border-radius: var(--r-btn);
+  background: var(--card);
+  box-shadow: 5px 6px 0 var(--ink);
+  font-family: var(--font-body); font-weight: 700; font-size: 40px; line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--t-quick) ease-out, box-shadow var(--t-quick) ease-out;
+}
+.btn img { width: 56px; height: 56px; }
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 8px 0 var(--ink); }
+.btn:active { transform: translate(4px, 5px); box-shadow: 1px 1px 0 var(--ink); }
+.btn--primary { background: var(--kokoro); color: #fff; }
+.btn--primary img { filter: brightness(0) invert(1); }
+.btn--sub { background: var(--paper); }
+.next-btn { /* いつも 右下 */ margin-left: auto; }
+.btn[hidden], .next-btn[hidden] { display: inline-flex !important; visibility: hidden; } /* 場所はのこす */
+
+/* =========================================================
+   6. 大きな紙（ステップクリア・せつめい）
+   ========================================================= */
+.sheet {
+  grid-row: question / choices; grid-column: 1;
+  z-index: 20;
+  align-self: center; justify-self: center;
+  width: 1500px; min-height: 560px;
+  display: grid; grid-template-columns: 340px 1fr; align-items: center; gap: 64px;
+  padding: 56px 72px;
+  background: var(--card);
+  border: var(--line) solid var(--ink);
+  border-radius: 20px 32px 24px 38px;
+  box-shadow: 10px 12px 0 var(--accent-tint);
+  transform: rotate(-.6deg);
+}
+.sheet::before {   /* 上の テープ2まい */
+  content: ""; position: absolute; left: 80px; top: -20px; width: 160px; height: 40px;
+  background: rgba(232, 201, 91, .55); transform: rotate(-5deg);
+}
+.sheet::after {
+  content: ""; position: absolute; right: 80px; top: -18px; width: 160px; height: 40px;
+  background: rgba(63, 111, 176, .22); transform: rotate(4deg);
+}
+.sheet-title {
+  margin: 0 0 12px;
+  font-family: var(--font-hand); font-weight: 600;
+  font-size: 56px; line-height: 1.6; color: var(--accent-ink);
+}
+.sheet-text { margin: 0; font-family: var(--font-ud); font-weight: 700; font-size: 38px; line-height: 1.85; }
+.stamp {   /* 3D が使えないときの スタンプ（CSS版） */
+  width: 320px; height: 320px;
+  display: grid; place-items: center;
+  transform: rotate(-10deg);
+}
+.stamp img { width: 100%; height: 100%; }
+.stamp-label {
+  display: block; margin-top: 8px; text-align: center;
+  font-family: var(--font-body); font-weight: 700; font-size: var(--fs-small); color: var(--shu);
+}
+.stamp.is-pressed { animation: press 520ms var(--ease-spring) both; }
+
+/* =========================================================
+   7. タイトル画面
+   ========================================================= */
+.title-screen {
+  grid-row: 1 / -1; grid-column: 1;
+  position: relative;
+  display: grid;
+  grid-template-columns: 860px 1fr;
+  grid-template-rows: auto auto;
+  align-content: center; align-items: start;
+  row-gap: 72px;
+  padding: 72px 0 72px 40px;
+}
+.title-main {
+  margin: 0;
+  font-family: var(--font-hand); font-weight: 600;
+  font-size: var(--fs-title); line-height: 1.55;
+  letter-spacing: .1em;
+  color: var(--ink);
+}
+.title-main ruby rt { font-family: var(--font-hand); font-size: .32em; letter-spacing: .1em; }
+.title-sub {
+  margin: 12px 0 0;
+  font-family: var(--font-body); font-weight: 700; font-size: 36px; line-height: 1.6;
+  color: var(--kokoro-ink);
+}
+.title-from {   /* 「ワークブック『大空に翔け』から」 */
+  margin: 40px 0 0;
+  font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.6;
+}
+.start-btn {
+  grid-column: 1; grid-row: 2; justify-self: start;
+  min-width: 420px; min-height: 140px; font-size: 52px;
+}
+/* たびの ちず: 右がわに ステップ3つを 点線で むすぶ */
+.route {
+  position: absolute; right: 0; top: 72px; bottom: 72px; width: 964px;
+  list-style: none; margin: 0; padding: 0;
+}
+.route-path {   /* 点線の みち（SVG を JS で置くか、design.md の path をそのまま使う） */
+  position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+}
+.route-path path { fill: none; stroke: var(--rule); stroke-width: 5; stroke-dasharray: 3 16; stroke-linecap: round; }
+.route-stop {
+  position: absolute;
+  display: flex; align-items: center; gap: 20px;
+  font-weight: 700; font-size: var(--fs-small); line-height: 1.5;
+}
+.route-stop { white-space: nowrap; }
+.route-stop img { flex: none; width: 112px; height: 112px; padding: 10px; border-radius: 50%; background: var(--paper); border: 4px solid currentColor; }
+/* 座標は .route（964×936）の中。.route-path の path と合わせてある */
+.route-stop:nth-of-type(1) { left: 40px;  top: 640px; color: var(--kokoro-ink); }
+.route-stop:nth-of-type(2) { left: 250px; top: 400px; color: var(--kotoba-ink); }
+.route-stop:nth-of-type(3) { left: 440px; top: 150px; color: var(--kurashi-ink); }
+.title-bird { position: absolute; right: 40px; top: -20px; width: 220px; height: 220px; transform: scaleX(-1) rotate(-8deg); }
+.route-stop span { color: var(--ink); }
+
+/* =========================================================
+   8. ふり返り画面「今日 できた こと」
+   ========================================================= */
+.reflect {
+  grid-row: question / choices; grid-column: 1;
+  position: relative;
+  margin: 40px 120px 0;
+  padding: 48px 64px 16px;
+  border: var(--line) solid var(--ink);
+  border-radius: 20px 28px 22px 32px;
+  background: transparent;
+}
+.reflect-title {   /* ワークブックの「ふりかえり」の見出しと同じ、線の上にのる札 */
+  position: absolute; left: 56px; top: -44px; margin: 0;
+  padding: 0 24px;
+  background: var(--paper);
+  font-family: var(--font-hand); font-weight: 600; font-size: 56px; line-height: 1.5;
+}
+.reflect { display: flex; flex-direction: column; justify-content: center; }
+.reflect-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.reflect-row {
+  display: grid; grid-template-columns: 120px 1fr 140px; align-items: center; gap: 36px;
+  padding: 8px 0 14px;
+  border-bottom: 3px dashed var(--rule);
+}
+.reflect-row:last-child { border-bottom: 0; }
+.reflect-pic { width: 112px; height: 112px; }
+.reflect-text { font-family: var(--font-ud); font-weight: 700; font-size: 36px; line-height: 1.8; }
+.stamp-slot {   /* 3D のスタンプが ここに 押される。3D がないときは中に stamp-N.svg */
+  width: 136px; height: 136px; border-radius: 50%;
+  border: 4px dashed var(--rule);
+  display: grid; place-items: center;
+}
+.stamp-slot img { width: 124px; height: 124px; transform: rotate(-8deg); }
+.reflect-last {   /* 下の帯の .talk の中で使う */
+  margin: 0;
+  font-family: var(--font-hand); font-weight: 600; font-size: 40px; line-height: 1.7;
+  color: var(--kokoro-ink);
+}
+.footer .btn + .btn { margin-left: var(--gap); }
+
+/* =========================================================
+   9. その他
+   ========================================================= */
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+/* 問題エリアの外の かざり（雲）。問題中は 動かさない */
+.deco-cloud { position: absolute; z-index: 0; width: 180px; opacity: .9; pointer-events: none; }
+
+@keyframes guide  { 0%, 100% { outline-color: var(--hint-line); box-shadow: var(--shadow); }
+                    50%      { outline-color: #f3dc8c; box-shadow: 0 0 0 22px rgba(232, 201, 91, .28), var(--shadow); } }
+@keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-1.6deg); } 75% { transform: rotate(1.6deg); } }
+@keyframes press  { 0% { transform: rotate(-10deg) scale(1.5); opacity: 0; } 100% { transform: rotate(-10deg) scale(1); opacity: 1; } }
+
+/* ---------- うごきを へらす ---------- */
+/* 右上の「うごき すくなめ」→ .stage に data-motion="less"。OSの設定でも同じ。 */
+.stage[data-motion="less"] *,
+.stage[data-motion="less"] *::before,
+.stage[data-motion="less"] *::after {
+  animation: none !important;
+  transition-duration: 1ms !important;
+}
+.stage[data-motion="less"] .choice,
+.stage[data-motion="less"] .sort-card,
+.stage[data-motion="less"] .sheet { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .stage *, .stage *::before, .stage *::after { animation: none !important; transition-duration: 1ms !important; }
+}

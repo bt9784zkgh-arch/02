@@ -59,6 +59,7 @@
 - フォントは `fonts/` に同梱（WOFF2・文字はけずっていない）。`local()` を先にさがす。ない環境の代わり: Hiragino Maru Gothic ProN → Meiryo → sans-serif。ライセンスは `fonts/README.md`。
 - **ふりがな**: 設計書の `{漢字|かんじ}` は `<ruby>漢字<rt>かんじ</rt></ruby>` にする（`<rp>` は不要）。
   CSS で `rt` を上に うかせて（`position:absolute`）、**行の高さを広げない**。文の行間が 1.6 以上あるので、2行目のふりがなと1行目の字は重ならない。
+  `ruby` は `display:inline`（inline-block や ruby にすると、その すぐ後ろで ことばが 切れる）。`.stage` に `word-break: keep-all` を入れて、行は スペースの所でだけ かわる。
   変換は1行でできる: `s.replace(/\{([^|}]+)\|([^}]+)\}/g, '<ruby>$1<rt>$2</rt></ruby>')`
 - 読み上げ（`speechSynthesis`）には ふりがなを読ませる: `{漢字|かんじ}` → `かんじ` に置きかえた文を渡す。
 

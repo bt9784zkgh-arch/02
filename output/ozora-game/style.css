@@ -158,12 +158,14 @@ img { display: block; max-width: 100%; }
 /* rt を上に うかせて、行の高さを 広げない。行間は 1.75 以上なので重ならない。 */
 ruby {
   position: relative;
-  display: ruby;            /* inline-block にすると、その前後で ことばが 切れてしまう */
+  display: inline;          /* inline-block や ruby にすると、その すぐ後ろで ことばが 切れてしまう（Chrome）。
+                               ふつうの文字としてならべ、rt だけを 上に うかせる */
   line-height: 1;
   text-indent: 0;
   ruby-position: over;
 }
 ruby rt {
+  display: block;
   position: absolute;
   left: 50%; bottom: 100%;
   transform: translateX(-50%);
@@ -287,7 +289,7 @@ rp { display: none; }
 }
 /* マスキングテープ（おてほん・せつめい の しるし） */
 .tape {
-  position: absolute; left: 168px; top: -14px; z-index: 2;
+  position: absolute; left: 168px; top: -34px; z-index: 2;   /* 問題文の ふりがなに かからない 高さ */
   padding: 0 26px 0 22px;
   background: rgba(232, 201, 91, .55);
   font-family: var(--font-hand); font-weight: 600; font-size: var(--fs-small); line-height: 1.4;
@@ -699,7 +701,7 @@ rp { display: none; }
 .route-stop {
   position: absolute;
   display: flex; align-items: center; gap: 20px;
-  font-weight: 700; font-size: var(--fs-small); line-height: 1.5;
+  font-weight: 700; font-size: var(--fs-small); line-height: 1.9;
 }
 .route-stop { white-space: nowrap; }
 .route-stop img { flex: none; width: 112px; height: 112px; padding: 10px; border-radius: 50%; background: var(--paper); border: 4px solid currentColor; }
@@ -746,7 +748,7 @@ rp { display: none; }
 .stamp-slot img { width: 124px; height: 124px; transform: rotate(-8deg); }
 .reflect-last {   /* 下の帯の .talk の中で使う */
   margin: 0;
-  font-family: var(--font-hand); font-weight: 600; font-size: 40px; line-height: 1.7;
+  font-family: var(--font-hand); font-weight: 600; font-size: 40px; line-height: 1.95;
   color: var(--kokoro-ink);
 }
 .footer .btn + .btn { margin-left: var(--gap); }

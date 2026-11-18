@@ -38,6 +38,7 @@
 
   /* ---------- 設定 ---------- */
   var BGM_VOLUME = 0.12;   // BGM 主音量（0.08〜0.12 の上限）
+  var BGM_TRIM = 1.5;     // コンプレッサーに入る前の音量合わせ（主音量ではない）
   var SFX_VOLUME = 0.28;   // 効果音の上限（0.3 以下）
   var DUCK_LEVEL = 0.5;    // 効果音のあいだ BGM をこの割合まで下げる
   var TEMPO = 80;
@@ -84,7 +85,7 @@
 
   /* ---------- 状態 ---------- */
   var ctx = null;
-  var master, bgmBus, duckBus, sfxBus, reverb, reverbSend, noiseBuf;
+  var master, bgmBus, bgmVol, duckBus, sfxBus, reverb, reverbSend, noiseBuf;
   var muted = false;
   var playing = false;
   var timer = null;
@@ -107,14 +108,13 @@
       master = ctx.createGain();
       master.gain.value = muted ? 0 : 1;
 
-      // ゆるいコンプレッサーで急な大きい音をおさえる（聴覚過敏への配慮）
+      // 全体: ゆるいコンプレッサーで急な大きい音をおさえる（聴覚過敏への配慮）
       var comp = ctx.createDynamicsCompressor();
-      // 音量の山と谷をならして、小さい音も聞こえやすくする
-      comp.threshold.value = -30;
-      comp.knee.value = 10;
-      comp.ratio.value = 3;
-      comp.attack.value = 0.01;
-      comp.release.value = 0.3;
+      comp.threshold.value = -18;
+      comp.knee.value = 12;
+      comp.ratio.value = 4;
+      comp.attack.value = 0.005;
+      comp.release.value = 0.25;
       master.connect(comp);
       comp.connect(ctx.destination);
 
@@ -122,9 +122,24 @@
       duckBus.gain.value = 1;
       duckBus.connect(master);
 
+      // BGM だけのコンプレッサー: 音量の山と谷をならして、小さい音も聞こえやすくする
+      // （効果音はここを通らないので、BGM の上ではっきり聞こえる）
+      // 楽器 → bgmBus → bgmComp → bgmVol（主音量・フェード）→ duckBus（ダッキング）
+      bgmVol = ctx.createGain();
+      bgmVol.gain.value = 0;
+      bgmVol.connect(duckBus);
+
+      var bgmComp = ctx.createDynamicsCompressor();
+      bgmComp.threshold.value = -24;
+      bgmComp.knee.value = 10;
+      bgmComp.ratio.value = 3;
+      bgmComp.attack.value = 0.01;
+      bgmComp.release.value = 0.3;
+      bgmComp.connect(bgmVol);
+
       bgmBus = ctx.createGain();
-      bgmBus.gain.value = 0;
-      bgmBus.connect(duckBus);
+      bgmBus.gain.value = BGM_TRIM;
+      bgmBus.connect(bgmComp);
 
       sfxBus = ctx.createGain();
       sfxBus.gain.value = 1;
@@ -363,11 +378,11 @@
     var ch = CH[bar.c];
 
     // パッド（切れ目なく）
-    warmPad(bgmBus, t, ch.pad, 0.30, BAR);
+    warmPad(bgmBus, t, ch.pad, 0.26, BAR);
 
     // ベース: 1拍目と3拍目
-    softBass(bgmBus, t, ch.bass, 0.34, BEAT * 2);
-    softBass(bgmBus, t + BEAT * 2, ch.bass, 0.26, BEAT * 2);
+    softBass(bgmBus, t, ch.bass, 0.28, BEAT * 2);
+    softBass(bgmBus, t + BEAT * 2, ch.bass, 0.22, BEAT * 2);
 
     // 分散和音: 中音域のオルゴールで8分音符
     ARP_PATTERN.forEach(function (p) {
@@ -554,7 +569,7 @@
     var now = ctx.currentTime;
     barIndex = 0;
     nextBarTime = now + 0.15;
-    var g = bgmBus.gain;
+    var g = bgmVol.gain;
     g.cancelScheduledValues(now);
     g.setValueAtTime(Math.max(g.value, 0.0001), now);
     g.linearRampToValueAtTime(BGM_VOLUME, now + 1.5); // 1.5 秒でフェードイン
@@ -567,7 +582,7 @@
     playing = false;
     if (timer) { clearInterval(timer); timer = null; }
     var now = ctx.currentTime;
-    var g = bgmBus.gain;
+    var g = bgmVol.gain;
     g.cancelScheduledValues(now);
     g.setValueAtTime(g.value, now);
     g.linearRampToValueAtTime(0, now + 1.0);

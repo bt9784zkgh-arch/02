@@ -1408,8 +1408,7 @@ def scene_s3_2(path):
     wall(cv, FLOOR, color=mix('ai2', 'ai', 0.4), panel=False)
     cv.line([(-10, FLOOR - 60), (SW + 10, FLOOR - 60)], width=4, color=mix('ai2', 'kinari', 0.2))
     # warm lamp so it is not too dark
-    cv.fill(ell(1120, 230, 200, 170, n=60), mix('ai2', 'kin', 0.22), tex=0.04, edge=False)
-    cv.fill(ell(1120, 230, 120, 100, n=60), mix('ai2', 'kin', 0.38), tex=0.04, edge=False)
+    cv.fill([(1072, 262), (1168, 262), (1250, FLOOR - 4), (990, FLOOR - 4)], mix('ai2', 'kin', 0.28), tex=0.04)
     cv.tube([(1120, 260), (1120, FLOOR - 10)], 10, 'kinink')
     cv.shape([(1060, 260), (1180, 260), (1150, 180), (1090, 180)], fill='kin')
     window(cv, 120, 80, 330, 270, night=True)

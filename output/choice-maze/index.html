@@ -14,7 +14,12 @@
   .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 620px; }
   .cm-guide[hidden], .cm-btn[hidden] { display: none; }
   .cm-screen.is-demo .cm-choice, .cm-screen.is-demo .cm-other__btns .cm-btn { pointer-events: none; }
-  img.is-missing { visibility: hidden; }
+  img.is-missing { background: var(--cm-kinari-2); }
+  .cm-main:focus { outline: none; }
+  .cm-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cm-future--mini .cm-future__row--noicon { grid-template-columns: 1fr; }
+  .cm-future--mini { padding: 36px 32px 24px; }
+  .cm-future--mini .cm-future__body { gap: 12px; }
   .cm-ctrl.is-off .ic-wave, .cm-ctrl:not(.is-off) .ic-mute { display: none; }
   .cm-ctrl.is-low { background: var(--cm-kinari-2); }
   .cm-ctrl.is-low .ic-wave2 { display: none; }

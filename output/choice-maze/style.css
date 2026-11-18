@@ -1,0 +1,541 @@
+/* =========================================================
+   せんたくの めいきゅう  style.css
+   テーマ: じゅうたん模様の迷宮（紺・赤・金・生成り）
+   基準 1920x1080。.cm-stage をまるごと拡大縮小する（design.md「画面サイズ」参照）
+   クラス名はすべて cm- ではじまる。一覧は design.md にある。
+   ========================================================= */
+
+@import url("fonts/fonts.css");
+
+:root {
+  /* --- 色（5色＋背景） --- */
+  --cm-ai: #1E2747;          /* 紺: じゅうたん左 */
+  --cm-ai-deep: #121931;     /* 夜の紺: 画面の地 */
+  --cm-akane: #8C2B22;       /* 茜: じゅうたん右 */
+  --cm-kin: #D2A03A;         /* 金: 道・ランプ（飾りと面。文字には使わない） */
+  --cm-kinari: #F2E6CB;      /* 生成り: 紙・カード */
+  --cm-kinari-2: #E6D3AA;    /* 生成りの影色: 房・押した面 */
+  --cm-sumi: #2A211C;        /* 墨: 文字・線 */
+  --cm-kin-ink: #6B4A12;     /* 金の墨: 生成りの上の小さいラベル・ステッチ */
+  --cm-ai-ink: #26346A;      /* 紺の墨: 生成りの上の強調 */
+
+  /* --- 文字 --- */
+  --cm-font-body: "Zen Maru Gothic", "BIZ UDPGothic", "BIZ UDPゴシック", "Hiragino Maru Gothic ProN", "ヒラギノ丸ゴ ProN", "Meiryo UI", "Meiryo", "IPAPGothic", sans-serif;
+  --cm-font-hand: "Klee One", "Zen Maru Gothic", "UD Digi Kyokasho N-R", "UDデジタル教科書体 N-R", "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+  --cm-fs-label: 28px;   /* いちばん小さい文字 */
+  --cm-fs-body: 32px;    /* 本文・カードの文 */
+  --cm-fs-q: 44px;       /* 問題文・場面の説明 */
+  --cm-fs-head: 64px;    /* 見出し */
+  --cm-fs-title: 104px;  /* タイトル */
+  --cm-lh: 1.7;
+
+  /* --- 形 --- */
+  --cm-r-rug: 6px;       /* じゅうたん（カード）はほぼ角 */
+  --cm-r-btn: 20px;      /* ボタン */
+  --cm-line: 4px;        /* 押せるものの外枠 */
+  --cm-press: 0 8px 0 var(--cm-sumi);       /* ボタンの厚み（ぼかさない） */
+  --cm-press-down: 0 2px 0 var(--cm-sumi);
+  --cm-gap: 24px;        /* 押せるもの同士の最小間隔 */
+  --cm-focus: 0 0 0 6px var(--cm-kinari), 0 0 0 12px var(--cm-kin-ink);
+
+  /* --- 拡大縮小（game.js が設定する） --- */
+  --stage-scale: 1;
+
+  /* --- 動き --- */
+  --cm-breath-cycle: 8s;   /* 4秒すう＋4秒はく */
+  --cm-ease: cubic-bezier(.34, 1.4, .64, 1);
+}
+
+/* ---------- 土台 ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--cm-ai-deep) url("assets/svg/rug-tile.svg") repeat;
+  background-size: 120px 120px;
+  color: var(--cm-sumi);
+  font-family: var(--cm-font-body);
+  font-weight: 500;
+  font-size: var(--cm-fs-body);
+  line-height: var(--cm-lh);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  /* 分かち書きのスペースでだけ折り返す（ことばの途中で切らない） */
+  word-break: keep-all; overflow-wrap: anywhere; line-break: strict;
+}
+ruby rt { font-size: .5em; font-weight: 500; letter-spacing: .02em; }
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+.cm-sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* 1920x1080 の舞台。JS: s = Math.min(innerWidth/1920, innerHeight/1080) */
+.cm-stage {
+  position: absolute; left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale));
+  transform-origin: 50% 50%;
+  background: var(--cm-ai-deep) url("assets/svg/rug-tile.svg") repeat;
+  background-size: 120px 120px;
+  overflow: hidden;
+}
+/* じゅうたんの「地」: 模様はまわりの縁だけ。まんなかは無地にして気を散らさない */
+.cm-stage::before {
+  content: ""; position: absolute; inset: 28px; z-index: 0;
+  background: var(--cm-ai-deep);
+  border: 4px solid var(--cm-kin-ink); outline: 3px dashed var(--cm-kin-ink); outline-offset: -14px;
+}
+/* 3D演出のかさね（Motion3D.init の container） */
+.cm-layer3d {
+  position: absolute; inset: 0; z-index: 30; pointer-events: none;
+}
+
+/* ---------- 画面のわく（全画面で同じ位置） ---------- */
+.cm-screen {
+  position: absolute; inset: 0; display: none; z-index: 10;
+}
+.cm-screen.is-active { display: block; }
+
+.cm-topbar {
+  position: absolute; left: 0; right: 0; top: 0; height: 160px; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  background: var(--cm-ai);
+}
+/* 上の帯のふち: じゅうたんの縁どり（静止） */
+.cm-topbar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -14px; height: 14px;
+  background:
+    repeating-linear-gradient(135deg, var(--cm-akane) 0 10px, transparent 10px 20px),
+    repeating-linear-gradient(45deg, var(--cm-kin) 0 10px, var(--cm-ai) 10px 20px);
+  opacity: .9;
+}
+
+.cm-progress {
+  display: flex; align-items: center; gap: 32px;
+  background: var(--cm-kinari); border-radius: var(--cm-r-rug);
+  padding: 8px 32px; min-height: 104px;
+  outline: 3px dashed var(--cm-kin-ink); outline-offset: -12px;
+}
+.cm-progress__label { font-size: var(--cm-fs-body); font-weight: 700; white-space: nowrap; }
+.cm-dots { display: flex; gap: 16px; list-style: none; margin: 0; padding: 0; }
+.cm-dot {
+  display: flex; flex-direction: column; align-items: center;
+  font-size: var(--cm-fs-label); line-height: 1.2; color: var(--cm-sumi);
+}
+.cm-dot::before {
+  content: ""; width: 36px; height: 36px; border-radius: 50%;
+  border: 4px solid var(--cm-sumi); background: transparent; margin-bottom: 4px;
+}
+.cm-dot.is-now::before  { background: var(--cm-kinari); box-shadow: inset 0 0 0 6px var(--cm-kin); }
+.cm-dot.is-done::before {          /* 色だけにしない: 済みはチェックの形 */
+  background: var(--cm-sumi) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5l4 4 8-9' fill='none' stroke='%23F2E6CB' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
+}
+/* いまは太字＋下線 */
+.cm-dot.is-now { font-weight: 700; text-decoration: underline 4px var(--cm-kin-ink); text-underline-offset: 6px; }
+
+.cm-controls { display: flex; gap: var(--cm-gap); }
+.cm-ctrl {
+  width: 120px; height: 120px; border-radius: var(--cm-r-btn);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: var(--cm-kinari); border: var(--cm-line) solid var(--cm-sumi);
+  box-shadow: var(--cm-press); cursor: pointer;
+  font-size: var(--cm-fs-label); font-weight: 700; line-height: 1.15;
+}
+.cm-ctrl__icon { width: 44px; height: 44px; }
+.cm-ctrl.is-off { background: var(--cm-kinari-2); }
+.cm-ctrl.is-off .cm-ctrl__state { text-decoration: line-through 3px; }
+
+.cm-main {
+  position: absolute; left: 0; right: 0; top: 174px; bottom: 160px;
+  padding: 32px 80px;
+}
+
+.cm-bottombar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 160px; z-index: 40;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 80px;
+}
+
+/* ---------- ボタン ---------- */
+.cm-btn {
+  min-width: 120px; min-height: 120px; padding: 12px 40px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 16px;
+  background: var(--cm-kinari); color: var(--cm-sumi);
+  border: var(--cm-line) solid var(--cm-sumi); border-radius: var(--cm-r-btn);
+  box-shadow: var(--cm-press);
+  font-size: var(--cm-fs-q); font-weight: 700; line-height: 1.3;
+  cursor: pointer; transition: transform .12s ease, box-shadow .12s ease;
+}
+.cm-btn:hover { background: #F8EED8; }
+.cm-btn:active, .cm-ctrl:active, .cm-choice:active {
+  transform: translateY(6px); box-shadow: var(--cm-press-down);
+}
+.cm-btn--primary { background: var(--cm-kin); min-width: 360px; }
+.cm-btn--primary:hover { background: #DDAE4C; }
+.cm-btn--primary::after {          /* 矢じるしは形で: 右向きの三角 */
+  content: ""; width: 0; height: 0;
+  border-left: 24px solid var(--cm-sumi);
+  border-top: 16px solid transparent; border-bottom: 16px solid transparent;
+}
+.cm-btn--sub { font-size: var(--cm-fs-body); }
+.cm-btn--read { width: 120px; padding: 0; flex-direction: column; gap: 0; font-size: var(--cm-fs-label); }
+.cm-btn--read .cm-btn__icon { width: 48px; height: 48px; }
+.cm-btn[disabled] { opacity: .45; cursor: default; box-shadow: none; }
+
+:where(.cm-btn, .cm-ctrl, .cm-choice, .cm-map__node):focus-visible {
+  outline: none; box-shadow: var(--cm-press), var(--cm-focus);
+}
+
+/* ---------- 紙（生成りの布）と房 ---------- */
+.cm-paper {
+  position: relative;
+  background: var(--cm-kinari);
+  border: 3px solid var(--cm-sumi);
+  border-radius: var(--cm-r-rug);
+  padding: 40px 48px;
+}
+.cm-paper::before {                 /* 金の糸のステッチ */
+  content: ""; position: absolute; inset: 10px;
+  border: 3px dashed var(--cm-kin-ink); border-radius: 2px; pointer-events: none;
+}
+/* じゅうたんの房（下） */
+.cm-fringe::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: -22px; height: 20px;
+  background: repeating-linear-gradient(90deg, var(--cm-kinari-2) 0 5px, transparent 5px 11px);
+  border-top: 3px solid var(--cm-sumi);
+}
+/* じゅうたんの房（左右）: 未来カード用 */
+.cm-fringe--side::after {
+  left: -22px; right: -22px; top: 18px; bottom: 18px; height: auto; border-top: 0;
+  background:
+    repeating-linear-gradient(0deg, var(--cm-kinari-2) 0 5px, transparent 5px 11px) left / 20px 100% no-repeat,
+    repeating-linear-gradient(0deg, var(--cm-kinari-2) 0 5px, transparent 5px 11px) right / 20px 100% no-repeat;
+}
+
+/* =========================================================
+   1. タイトル（home.jpg 全面）
+   ========================================================= */
+.cm-title-screen {
+  background: var(--cm-ai-deep) url("assets/img/home.jpg") center / cover no-repeat;
+}
+.cm-title-banner {                  /* 左上の紺のじゅうたんの上。人物（中央）にかぶらない */
+  position: absolute; left: 96px; top: 200px; width: 680px;
+  padding: 56px 56px 48px;
+  transform: rotate(-1.5deg);
+}
+.cm-title__main {
+  margin: 0; font-family: var(--cm-font-hand); font-weight: 600;
+  font-size: var(--cm-fs-title); line-height: 1.25; letter-spacing: .04em;
+}
+.cm-title__main ruby rt { font-size: .3em; }
+.cm-title__sub {
+  margin: 20px 0 0; font-size: var(--cm-fs-q); line-height: 1.5; color: var(--cm-ai-ink); font-weight: 700;
+}
+.cm-start-btn {                     /* 下の中央、人物の影の先 */
+  position: absolute; left: 50%; top: 840px; transform: translateX(-50%);
+  min-width: 440px; min-height: 140px; font-size: 56px;
+}
+.cm-start-btn:active { transform: translateX(-50%) translateY(6px); }
+
+/* =========================================================
+   2. 迷宮の地図
+   ========================================================= */
+.cm-map { position: absolute; inset: 0; }
+.cm-map__path {                     /* 金の道（SVGをJSで置いてもよい） */
+  position: absolute; left: 160px; right: 160px; top: 360px; height: 72px;
+  background: var(--cm-kin);
+  border-top: 4px solid var(--cm-sumi); border-bottom: 4px solid var(--cm-sumi);
+  transform: rotate(-3deg);
+}
+.cm-map__nodes {
+  position: absolute; left: 160px; right: 160px; top: 200px;
+  display: flex; justify-content: space-between; list-style: none; margin: 0; padding: 0;
+}
+.cm-map__node {
+  position: relative; width: 400px; min-height: 380px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  cursor: pointer; text-align: center;
+  font-size: var(--cm-fs-body); font-weight: 700;
+}
+.cm-map__node .cm-lamps { justify-content: center; }
+.cm-map__node.is-now { outline: 6px solid var(--cm-kin); outline-offset: 8px; }
+.cm-map__node.is-now::before {      /* いまの場所は「ここ」の札でも示す */
+  content: "いま ここ"; position: absolute; top: -64px; left: 50%; transform: translateX(-50%);
+  background: var(--cm-sumi); color: var(--cm-kinari); padding: 4px 20px; border-radius: 4px;
+  font-size: var(--cm-fs-label); white-space: nowrap;
+}
+
+/* =========================================================
+   3. 場面（絵＋説明）
+   ========================================================= */
+.cm-scene {
+  display: grid; grid-template-columns: 1072px 1fr; gap: 48px; align-items: center; height: 100%;
+}
+.cm-scene__art {
+  width: 1072px; height: 603px; padding: 14px;
+  background: var(--cm-akane); border: 4px solid var(--cm-sumi); border-radius: var(--cm-r-rug);
+}
+.cm-scene__art img { width: 100%; height: 100%; object-fit: cover; border: 3px solid var(--cm-sumi); }
+.cm-scene__text { font-size: var(--cm-fs-q); line-height: var(--cm-lh); }
+.cm-scene__line { margin: 0 0 24px; }
+.cm-scene__line:last-child { margin-bottom: 0; }
+.cm-scene__who {                    /* 「あいて: 先生」 */
+  display: inline-block; margin-top: 24px; padding: 4px 20px;
+  background: var(--cm-ai); color: var(--cm-kinari); border-radius: 4px;
+  font-size: var(--cm-fs-label);
+}
+
+/* =========================================================
+   4. 3びょう まって かんがえよう
+   ========================================================= */
+.cm-breath {
+  height: 100%; display: grid; grid-template-columns: 1fr 520px 1fr; align-items: center; gap: 48px;
+}
+.cm-breath__ask { font-size: var(--cm-fs-q); font-weight: 700; }
+.cm-breath__ringwrap { position: relative; width: 520px; height: 520px; display: grid; place-items: center; }
+.cm-breath__ring {
+  width: 480px; height: 480px; border-radius: 50%;
+  background: radial-gradient(circle, var(--cm-kinari) 0 62%, var(--cm-kinari-2) 63% 100%);
+  border: 12px solid var(--cm-kin);
+  box-shadow: 0 0 0 4px var(--cm-sumi), inset 0 0 0 4px var(--cm-sumi);
+  transform: scale(.7);
+  animation: cm-breathe var(--cm-breath-cycle) ease-in-out infinite;
+}
+.cm-breath__word {                  /* 円のまんなか。「すって」「はいて」はJSで入れかえ */
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--cm-font-hand); font-weight: 600; font-size: 64px; color: var(--cm-sumi);
+}
+.cm-breath__beads { display: flex; gap: 24px; list-style: none; margin: 0; padding: 0; justify-content: center; }
+.cm-breath__bead {                  /* 1・2・3 の数珠。0になっても何も起きない */
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  border: 4px solid var(--cm-kinari); color: var(--cm-kinari); font-size: var(--cm-fs-body); font-weight: 700;
+}
+.cm-breath__bead.is-done { background: var(--cm-kinari); color: var(--cm-sumi); }
+@keyframes cm-breathe {
+  0%   { transform: scale(.7); }
+  50%  { transform: scale(1); }
+  100% { transform: scale(.7); }
+}
+
+/* =========================================================
+   5. 4つの みち（選択カード）＆ まとめの問い
+   ========================================================= */
+.cm-prompt {
+  margin: 0 0 32px; padding: 12px 40px; display: inline-block;
+  background: var(--cm-kinari); border: 3px solid var(--cm-sumi); border-radius: var(--cm-r-rug);
+  font-size: var(--cm-fs-q); font-weight: 700; line-height: 1.5;
+}
+.cm-choices {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; list-style: none; margin: 0; padding: 0;
+}
+.cm-choice {                        /* 4枚とも同じ枠。色でおすすめを示さない */
+  position: relative; display: flex; flex-direction: column; gap: 16px;
+  min-height: 520px; padding: 56px 20px 24px;
+  background: var(--cm-kinari); border: var(--cm-line) solid var(--cm-sumi); border-radius: var(--cm-r-rug);
+  box-shadow: var(--cm-press); cursor: pointer; text-align: left;
+  font-size: var(--cm-fs-body); line-height: 1.55; font-weight: 700;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .2s;
+}
+.cm-choice::before {                /* ステッチ */
+  content: ""; position: absolute; inset: 10px; border: 3px dashed var(--cm-kin-ink); pointer-events: none;
+}
+.cm-choice:hover { transform: translateY(-6px); box-shadow: 0 14px 0 var(--cm-sumi); }
+.cm-choice__mark {                  /* 形マーク＋文字。左上にはみ出す札 */
+  position: absolute; left: -16px; top: -28px; width: 96px; height: 96px;
+  display: grid; place-items: center;
+  background: center / contain no-repeat;
+  color: var(--cm-kinari); font-size: 40px; font-weight: 700; line-height: 1;
+}
+.cm-mark--a { background-image: url("assets/svg/mark-a.svg"); }
+.cm-mark--b { background-image: url("assets/svg/mark-b.svg"); padding-top: 16%; }
+.cm-mark--c { background-image: url("assets/svg/mark-c.svg"); }
+.cm-mark--d { background-image: url("assets/svg/mark-d.svg"); }
+.cm-choice__key {                   /* キーボードの番号 */
+  position: absolute; right: 20px; top: 14px; min-width: 52px; height: 52px; padding: 0 8px;
+  display: grid; place-items: center; border: 3px solid var(--cm-sumi); border-radius: 6px;
+  background: var(--cm-kinari); font-size: var(--cm-fs-label); line-height: 1;
+}
+.cm-choice__art { width: 100%; aspect-ratio: 4 / 3; border: 3px solid var(--cm-sumi); background: var(--cm-kinari-2); }
+.cm-choice__art img { width: 100%; height: 100%; object-fit: cover; }
+.cm-choice__text { margin: 0; }
+.cm-choice__lamps { margin-top: auto; }
+
+/* 選んだ・見た・しぼった・案内 の状態（どれも形やことばを添える） */
+.cm-choice.is-picked { outline: 8px solid var(--cm-kin); outline-offset: 6px; }
+.cm-choice.is-dimmed { opacity: .35; pointer-events: none; box-shadow: none; }
+.cm-choice.is-guided { outline: 8px solid var(--cm-kin); outline-offset: 10px; }
+.cm-choice.is-guided::after {       /* ひかりさんが「ここ」と指す */
+  content: ""; position: absolute; right: -40px; top: -56px; width: 120px; height: 120px;
+  background: url("assets/svg/hikari.svg") center / contain no-repeat;
+}
+.cm-seen-stamp {                    /* 「みた」のはんこ */
+  position: absolute; right: 18px; top: 76px; width: 96px; height: 96px; z-index: 2;
+  display: grid; place-items: center; border-radius: 50%;
+  border: 5px double var(--cm-akane); color: var(--cm-akane); background: rgba(242,230,203,.92);
+  font-family: var(--cm-font-hand); font-weight: 600; font-size: 32px; transform: rotate(-12deg);
+}
+
+/* ランプ（1〜3こ。比べるための目じるし。点数ではない） */
+.cm-lamps { display: flex; gap: 8px; align-items: center; }
+.cm-lamp { width: 56px; height: 56px; background: url("assets/svg/lamp-off.svg") center / contain no-repeat; }
+.cm-lamp.is-on { background-image: url("assets/svg/lamp-on.svg"); }
+.cm-lamp.is-unknown { background-image: url("assets/svg/lamp-unknown.svg"); }
+.cm-lamps--lg .cm-lamp { width: 80px; height: 80px; }
+
+/* =========================================================
+   6. 未来タイムライン
+   ========================================================= */
+.cm-timeline {                      /* 金の細い道に3つの結び目 */
+  position: relative; display: flex; justify-content: space-between; align-items: flex-start;
+  margin: 0 220px 40px; padding: 0; list-style: none; height: 128px;
+}
+.cm-timeline::before {
+  content: ""; position: absolute; left: 48px; right: 48px; top: 36px; height: 16px;
+  background: var(--cm-kin); border-top: 3px solid var(--cm-sumi); border-bottom: 3px solid var(--cm-sumi);
+}
+.cm-timeline__knot { position: relative; display: flex; flex-direction: column; align-items: center; width: 280px; }
+.cm-timeline__knot::before {
+  content: ""; width: 88px; height: 88px; border-radius: 50%;
+  background: var(--cm-ai); border: 5px solid var(--cm-kinari); box-sizing: border-box;
+}
+.cm-timeline__knot.is-done::before { background: var(--cm-kin) url("assets/svg/lamp-on.svg") center / 60% no-repeat; border-color: var(--cm-sumi); }
+.cm-timeline__knot.is-now::before { background: var(--cm-kinari); border: 8px solid var(--cm-kin); }
+.cm-timeline__label {
+  margin-top: -6px; padding: 0 16px; background: var(--cm-kinari); border-radius: 4px;
+  font-size: var(--cm-fs-label); font-weight: 700; line-height: 1.5; white-space: nowrap;
+}
+.cm-timeline__knot.is-now .cm-timeline__label { outline: 4px solid var(--cm-kin-ink); }
+
+.cm-future {                        /* 横長のじゅうたん1枚 */
+  position: relative; margin: 0 auto; width: 1480px; min-height: 440px;
+  display: grid; grid-template-columns: 300px 1fr; gap: 48px; align-items: start;
+  padding: 44px 64px;
+}
+.cm-future__path {                  /* どの道の未来か（左上の札） */
+  position: absolute; left: 40px; top: -30px; display: flex; align-items: center; gap: 12px;
+  background: var(--cm-kinari); color: var(--cm-sumi); border: 3px solid var(--cm-sumi);
+  padding: 4px 20px 4px 8px; border-radius: 4px;
+  font-size: var(--cm-fs-label); font-weight: 700;
+}
+.cm-future__path .cm-choice__mark { position: static; width: 52px; height: 52px; font-size: 24px; }
+.cm-future__face { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.cm-future__face img { width: 280px; height: 280px; border-radius: 50%; border: 4px solid var(--cm-sumi); background: var(--cm-kinari-2); }
+.cm-future__feel { font-family: var(--cm-font-hand); font-weight: 600; font-size: 44px; line-height: 1.3; text-align: center; }
+.cm-future__body { display: flex; flex-direction: column; gap: 28px; padding-top: 8px; }
+.cm-future__row { display: grid; grid-template-columns: 112px 1fr; gap: 24px; align-items: center; }
+.cm-future__row img { width: 112px; height: 112px; }
+.cm-future__row--noicon { grid-template-columns: 1fr; }
+.cm-future__partner img { border-radius: 50%; border: 3px solid var(--cm-sumi); background: var(--cm-kinari-2); }
+.cm-future__tag {                   /* 「きもち」「あいての はんのう」「つぎの もんだい」 */
+  display: block; color: var(--cm-kin-ink); font-size: var(--cm-fs-label); font-weight: 700; line-height: 1.3;
+}
+.cm-future__text { margin: 0; font-size: 36px; line-height: 1.6; font-weight: 700; }
+.cm-future__lamps { position: absolute; right: 48px; top: 28px; }
+
+/* 小さい未来カード（ほかの道・くらべる・ふり返り） */
+.cm-future--mini {
+  width: 760px; min-height: 0; grid-template-columns: 180px 1fr; gap: 28px; padding: 40px 36px 32px;
+}
+.cm-future--mini .cm-future__face img { width: 168px; height: 168px; }
+.cm-future--mini .cm-future__feel { font-size: 32px; }
+.cm-future--mini .cm-future__text { font-size: 30px; }
+.cm-future--mini .cm-future__row { grid-template-columns: 80px 1fr; }
+.cm-future--mini .cm-future__row img { width: 80px; height: 80px; }
+.cm-future--mini .cm-future__lamps { top: auto; bottom: 24px; right: 32px; }
+.cm-future--mini .cm-future__body { padding-bottom: 72px; }
+
+.cm-compare { display: flex; justify-content: center; gap: 64px; }
+
+/* =========================================================
+   7. ほかの みちも みてみる？
+   ========================================================= */
+.cm-other { display: grid; grid-template-columns: 760px 1fr; gap: 80px; align-items: center; height: 100%; }
+.cm-other__ask { font-size: var(--cm-fs-head); font-family: var(--cm-font-hand); font-weight: 600; line-height: 1.4; margin: 0 0 40px; color: var(--cm-kinari); }
+.cm-other__btns { display: flex; gap: 48px; }
+.cm-other__btns .cm-btn { min-width: 320px; min-height: 140px; }
+.cm-other__seen { display: flex; gap: 32px; margin-top: 48px; list-style: none; padding: 0; color: var(--cm-kinari); font-size: var(--cm-fs-label); }
+.cm-other__seen li { position: relative; display: flex; align-items: center; gap: 8px; }
+.cm-other__seen .cm-choice__mark { position: static; width: 64px; height: 64px; font-size: 28px; }
+
+/* =========================================================
+   8. ことば（ほめる・ヒント・ひかりさん）
+   ========================================================= */
+.cm-praise, .cm-hint {
+  position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+  min-width: 900px; max-width: 1400px; z-index: 45;
+  display: flex; align-items: center; gap: 32px;
+  font-size: var(--cm-fs-q); font-weight: 700; line-height: 1.5;
+}
+.cm-praise__icon, .cm-hint__icon { width: 120px; height: 120px; flex: none; }
+.cm-praise__text, .cm-hint__text { margin: 0; }   /* 文は必ずこの1つの要素に入れる（ルビが分かれないように） */
+.cm-praise { border-color: var(--cm-sumi); }
+.cm-praise::before { border-color: var(--cm-kin-ink); border-style: solid; }   /* ほめるは実線の金糸 */
+.cm-hint::before { border-style: dashed; }                                    /* ヒントは点線 */
+
+.cm-guide { position: absolute; left: 232px; bottom: 16px; z-index: 46; display: flex; align-items: flex-end; gap: 16px; pointer-events: none; }
+.cm-guide__orb { width: 128px; height: 128px; flex: none; background: url("assets/svg/hikari.svg") center / contain no-repeat; }
+.cm-guide__bubble {
+  position: relative; max-width: 1080px; padding: 12px 36px;
+  background: var(--cm-kinari); border: 4px solid var(--cm-sumi); border-radius: 28px 28px 28px 4px;
+  font-size: 40px; font-weight: 700; line-height: 1.45;
+}
+.cm-guide__name { display: block; font-size: var(--cm-fs-label); color: var(--cm-kin-ink); }
+.cm-pointer {                       /* おてほんで ひかりさんが指す場所の輪 */
+  position: absolute; z-index: 47; width: 140px; height: 140px; pointer-events: none;
+  border: 8px solid var(--cm-kin); border-radius: 50%;
+  box-shadow: 0 0 0 6px var(--cm-sumi);
+  transition: left .8s var(--cm-ease), top .8s var(--cm-ease);
+}
+
+/* =========================================================
+   9. ステップクリア
+   ========================================================= */
+.cm-clear { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; }
+.cm-clear__stamp { width: 400px; height: 400px; }
+.cm-clear__text { font-family: var(--cm-font-hand); font-weight: 600; font-size: 80px; line-height: 1.3; margin: 0; text-align: center; }
+.cm-clear__sub { font-size: var(--cm-fs-q); margin: 0; text-align: center; }
+.cm-clear .cm-paper { padding: 48px 96px; text-align: center; }
+
+/* =========================================================
+   10. ふり返り（2ページ）
+   ========================================================= */
+.cm-review__head {
+  margin: 0 0 32px; color: var(--cm-kinari);
+  font-family: var(--cm-font-hand); font-weight: 600; font-size: var(--cm-fs-head); line-height: 1.3;
+}
+.cm-review__page { display: none; }
+.cm-review__page.is-active { display: block; }
+.cm-review__rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px 40px; list-style: none; margin: 0; padding: 0; }
+.cm-review__row { position: relative; padding: 24px 24px 20px; font-size: var(--cm-fs-label); line-height: 1.5; }
+.cm-review__row img { width: 100%; aspect-ratio: 4 / 3; border: 3px solid var(--cm-sumi); margin-bottom: 8px; }
+.cm-review__row .cm-choice__mark { left: -14px; top: -22px; width: 72px; height: 72px; font-size: 30px; }
+.cm-review__cols { display: grid; grid-template-columns: 1fr 1.25fr; gap: 64px; }
+.cm-done-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 24px; }
+.cm-done-item { display: grid; grid-template-columns: 72px 1fr; gap: 20px; align-items: center; font-size: var(--cm-fs-body); font-weight: 700; }
+.cm-done-item::before {             /* 金のランプを1つともす */
+  content: ""; width: 72px; height: 72px; background: url("assets/svg/lamp-on.svg") center / contain no-repeat;
+}
+.cm-tips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; list-style: none; margin: 0; padding: 0; }
+.cm-tip { padding: 24px 24px 20px; font-size: var(--cm-fs-label); line-height: 1.55; font-weight: 700; }
+.cm-tip img { width: 100%; aspect-ratio: 4 / 3; margin-bottom: 12px; border: 3px solid var(--cm-sumi); }
+.cm-tip__no {                       /* 順番があるので番号を使う */
+  position: absolute; left: -14px; top: -20px; width: 64px; height: 64px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--cm-ai); color: var(--cm-kinari);
+  border: 3px solid var(--cm-kinari); font-size: 32px;
+}
+.cm-closing { margin-top: 32px; font-size: var(--cm-fs-q); line-height: 1.6; color: var(--cm-kinari); font-weight: 700; }
+.cm-closing p { margin: 0; }
+
+/* ---------- 「うごきを へらす」 ---------- */
+html[data-motion="low"] .cm-breath__ring { animation: none; transform: scale(.85); }
+html[data-motion="low"] *, html[data-motion="low"] *::before, html[data-motion="low"] *::after {
+  transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+}
+html[data-motion="low"] .cm-choice:hover { transform: none; box-shadow: var(--cm-press); }
+@media (prefers-reduced-motion: reduce) {
+  .cm-breath__ring { animation: none; transform: scale(.85); }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .cm-choice:hover { transform: none; box-shadow: var(--cm-press); }
+}

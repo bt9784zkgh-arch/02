@@ -11,7 +11,7 @@
   html.is-title .cm-topbar::after { display: none; }
   html.is-title .cm-progress { visibility: hidden; }
   .cm-bottombar__side { display: flex; align-items: center; gap: var(--cm-gap); }
-  .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 620px; }
+  .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 560px; }
   .cm-guide[hidden], .cm-btn[hidden] { display: none; }
   .cm-screen.is-demo .cm-choice, .cm-screen.is-demo .cm-other__btns .cm-btn { pointer-events: none; }
   img.is-missing { background: var(--cm-kinari-2); }
@@ -39,7 +39,14 @@
   .cm-future__body { gap: 18px; }
   /* まとめの問い: カードの絵を横長にして、ランプの場所をあける */
   .is-sum .cm-choice { min-height: 0; padding-top: 52px; gap: 12px; }
-  .is-sum .cm-choice__art { aspect-ratio: 16 / 10; }
+  .is-sum .cm-choice__art { aspect-ratio: 2 / 1; }
+  .is-sum .cm-choice { padding-bottom: 16px; }
+  .is-sum .cm-choice .cm-lamp { width: 48px; height: 48px; }
+  /* ほめる・ヒントの布: 「よむ」と「つぎへ」のあいだに おさめる */
+  .cm-praise, .cm-hint { left: 240px; right: 520px; transform: none; min-width: 0; max-width: none; padding: 28px 40px; }
+  .cm-praise__icon, .cm-hint__icon { width: 104px; height: 104px; }
+  .cm-guide__bubble { max-width: 900px; }
+  .cm-other__seen li { background: var(--cm-kinari); color: var(--cm-sumi); padding: 4px 16px 4px 6px; border-radius: 4px; font-weight: 700; }
   .is-sum .cm-prompt { margin-bottom: 28px; }
   /* ヒント・くらべる */
   .cm-sheet { display: flex; flex-direction: column; align-items: center; gap: 24px; }

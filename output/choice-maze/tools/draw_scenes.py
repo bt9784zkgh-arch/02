@@ -800,12 +800,12 @@ class Person:
                 cv.line([(mx + d * 0.05 * H * math.cos(ang), my + 0.05 * H * math.sin(ang)),
                          (mx + d * 0.22 * H * math.cos(ang), my + 0.22 * H * math.sin(ang))], width=lw * 0.8)
         elif e == 'breath':
-            mx, my = x + d * 0.48 * H, y + 0.25 * H
-            for k, oy in enumerate((-0.12, 0.0, 0.12)):
-                pts = [(mx + d * (0.05 + i * 0.07) * H, my + oy * H * (1 + i * 0.25) + math.sin(i * 1.7) * 0.025 * H)
-                       for i in range(5)]
-                cv.line(pts, width=0.06 * H + 2 * lw * 0.6, color='sumi', amp=0.3)
-                cv.line(pts, width=0.06 * H, color='kinari', amp=0, raw=True)
+            mx, my = x + d * 0.62 * H, y + 0.28 * H
+            for k, oy in enumerate((-0.16, 0.0, 0.16)):
+                pts = [(mx + d * (0.02 + i * 0.1) * H, my + oy * H * (1 + i * 0.3) + math.sin(i * 1.9) * 0.03 * H)
+                       for i in range(6)]
+                cv.line(pts, width=0.07 * H + 2 * lw * 0.7, color='sumi', amp=0.3)
+                cv.line(pts, width=0.07 * H, color='kinari', amp=0, raw=True)
         elif e == 'moya':
             cx, cy = x + 0.1 * H, y - 0.85 * H
             blob = []
@@ -1310,12 +1310,13 @@ def scene_s2_2(path):
     ball(cv, 820, 660, 34, 'soccer')
     ball(cv, 470, 680, 30, 'basket')
     # tangled net heap
-    heap = [(760, 640), (780, 590), (830, 570), (880, 585), (905, 640)]
+    heap = [(740, 648), (770, 618), (820, 608), (880, 616), (930, 632), (920, 656), (760, 662)]
     cv.shape(heap, fill=mix('kinari', 'kinari2', 0.5), lw=5, amp=2.0)
-    for k in range(6):
-        cv.line([(770 + k * 24, 640), (800 + k * 18, 575)], width=2.5, color='kinink', amp=0.8)
-        cv.line([(765 + k * 22, 585 + k * 2), (900 - k * 4, 640 - k * 10)], width=2.5, color='kinink', amp=0.8)
-    cv.line(bez((900, 630), (940, 660), (980, 640)), width=4, color='kinink', amp=1)
+    for k in range(7):
+        cv.line([(752 + k * 26, 660), (772 + k * 24, 612)], width=2.5, color='kinink', amp=0.6)
+    for yy in (626, 642):
+        cv.line([(748, yy + 6), (924, yy)], width=2.5, color='kinink', amp=0.8)
+    cv.line(bez((925, 645), (960, 676), (1000, 660)), width=4, color='kinink', amp=1)
     # two teammates, arms crossed, worried, on the right
     cross = {'L': dict(hand=(0.55, 0.42), bend=0.2, front=True), 'R': dict(hand=(-0.55, 0.42), bend=0.2, front=True)}
     person(cv, 'nakama', 1000, 690, 130, facing='l', brows='worry', mouth='frown', arms=cross)
@@ -1408,7 +1409,6 @@ def scene_s3_2(path):
     wall(cv, FLOOR, color=mix('ai2', 'ai', 0.4), panel=False)
     cv.line([(-10, FLOOR - 60), (SW + 10, FLOOR - 60)], width=4, color=mix('ai2', 'kinari', 0.2))
     # warm lamp so it is not too dark
-    cv.fill([(1072, 262), (1168, 262), (1250, FLOOR - 4), (990, FLOOR - 4)], mix('ai2', 'kin', 0.28), tex=0.04)
     cv.tube([(1120, 260), (1120, FLOOR - 10)], 10, 'kinink')
     cv.shape([(1060, 260), (1180, 260), (1150, 180), (1090, 180)], fill='kin')
     window(cv, 120, 80, 330, 270, night=True)
@@ -1421,8 +1421,6 @@ def scene_s3_2(path):
         cv.shape(scr, fill='kinari', line=False)
         c = rot_pts([(h[0] + 62, h[1] - 112)], h[0], h[1], 6)[0]
         bubble(cv, c[0], c[1], 56, 46, kind='spiky', content='none', fill='akane2', lwm=0.8)
-        for k in range(3):
-            cv.line([(c[0] - 24 + k * 22, c[1] - 9), (c[0] - 14 + k * 22, c[1] + 9)], width=5, color='kinari')
         c2 = rot_pts([(h[0] + 48, h[1] - 32)], h[0], h[1], 6)[0]
         bubble(cv, c2[0], c2[1], 40, 18, kind='round', tail=(-1, 0.4), content='dots', fill='kinari2', lwm=0.7)
     kid(cv, 470, 690, 160, facing='r', eyes='squeeze', brows='angry', mouth='tight', red=True,
@@ -1503,9 +1501,15 @@ def ch_s1_1_c(path):   # にげる: ドアからそっと出ていく後ろ姿
 
 def ch_s1_1_d(path):   # あやまって、いつ出せるか伝える
     cv = cbase(204)
-    calendar(cv, 420, 150, 180, 150, mark=(3, 1), today=(2, 1))
-    bow_kid(cv, 200, arms={'L': dict(hand=(0.08, 0.72)),
-                           'R': dict(hand=(0.95, 0.0), bend=-0.2, handshape='point', pdir=(1, -0.55))})
+    cx, cy = calendar(cv, 430, 120, 180, 156, mark=(3, 1), today=(2, 1))
+    p = bow_kid(cv, 190, arms={'L': dict(hand=(0.08, 0.72)),
+                               'R': dict(hand=(1.0, 0.1), bend=-0.2, handshape='point', pdir=(1, -0.8))})
+    h = p.hand('R')
+    fx, fy = h[0] + 0.2 * KH * 0.78, h[1] - 0.2 * KH * 0.62
+    n = 6
+    for k in range(1, n):
+        t = k / n
+        cv.dot(fx + (cx - 18 - fx) * t, fy + (cy + 22 - fy) * t, 4.5, color='kin')
     cv.save(path)
 
 
@@ -1786,8 +1790,6 @@ def ch_s3_2_a(path):   # 強い指で打つ＋とげとげ吹き出し
         cv.line([(350 + 30 * math.cos(ang), 300 + 30 * math.sin(ang)),
                  (350 + 54 * math.cos(ang), 300 + 54 * math.sin(ang))], width=3.5, color='red')
     bubble(cv, 490, 120, 112, 84, kind='spiky', content='none', fill='akane2', lwm=0.9)
-    for k in range(3):
-        cv.line([(456 + k * 30, 108), (468 + k * 30, 132)], width=5, color='kinari')
     cv.save(path)
 
 

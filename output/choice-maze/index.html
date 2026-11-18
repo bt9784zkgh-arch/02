@@ -11,7 +11,7 @@
   html.is-title .cm-topbar::after { display: none; }
   html.is-title .cm-progress { visibility: hidden; }
   .cm-bottombar__side { display: flex; align-items: center; gap: var(--cm-gap); }
-  .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 560px; }
+  .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 620px; }
   .cm-guide[hidden], .cm-btn[hidden] { display: none; }
   .cm-screen.is-demo .cm-choice, .cm-screen.is-demo .cm-other__btns .cm-btn { pointer-events: none; }
   img.is-missing { background: var(--cm-kinari-2); }
@@ -41,9 +41,12 @@
   .cm-future__body { gap: 18px; }
   /* まとめの問い: カードの絵を横長にして、ランプの場所をあける */
   .is-sum .cm-choice { min-height: 0; padding-top: 52px; gap: 12px; }
-  .is-sum .cm-choice__art { aspect-ratio: 2 / 1; }
+  .is-sum .cm-choice__art { aspect-ratio: 3 / 1; }
+  .cm-choice__art { aspect-ratio: 16 / 10; }
+  .cm-choice { min-height: 0; }
+  .cm-choice__art { overflow: hidden; min-height: 0; }
   .is-sum .cm-choice { padding-bottom: 16px; }
-  .is-sum .cm-choice .cm-lamp { width: 48px; height: 48px; }
+  .is-sum .cm-choice .cm-lamp { width: 44px; height: 44px; }
   /* ほめる・ヒントの布: 「よむ」と「つぎへ」のあいだに おさめる */
   .cm-praise, .cm-hint { left: 240px; right: 520px; transform: none; min-width: 0; max-width: none; padding: 28px 40px; }
   .cm-praise__icon, .cm-hint__icon { width: 104px; height: 104px; }
@@ -51,14 +54,29 @@
   .cm-other__seen li { background: var(--cm-kinari); color: var(--cm-sumi); padding: 4px 16px 4px 6px; border-radius: 4px; font-weight: 700; }
   .is-sum .cm-prompt { margin-bottom: 28px; }
   /* ヒント・くらべる */
-  .cm-sheet { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-  .cm-sheet__head { margin: 0; color: var(--cm-kinari); font-family: var(--cm-font-hand); font-weight: 600; font-size: 52px; line-height: 1.3; }
+  .cm-sheet { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .cm-compare--one .cm-future--mini { width: 1180px; grid-template-columns: 180px 1fr; }
+  .cm-sheet__head { margin: 0; color: var(--cm-kinari); font-family: var(--cm-font-hand); font-weight: 600; font-size: 44px; line-height: 1.3; }
   /* ふり返り 1ページ目: 絵を左、文を右にして 4列×2段に入れる */
   .cm-review__head { margin-bottom: 8px; }
-  .cm-review__row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; padding: 22px 20px 18px; }
-  .cm-review__row img { width: 150px; margin: 0; }
-  .cm-review__name { display: block; font-weight: 700; font-size: var(--cm-fs-label); line-height: 1.5; }
-  .cm-review__count { display: block; margin-top: 4px; color: var(--cm-ai-ink); font-weight: 700; }
+  /* ふり返り 1ページ目: 1場面 1行（えらんだ道の絵・名前・見た数・みた みらい） */
+  .cm-review__heads { display: grid; grid-template-columns: minmax(0, 1fr) 840px; padding: 0 20px; }
+  .cm-review__heads .cm-review__sub { margin-bottom: 8px; }
+  .cm-review__list { grid-template-columns: 1fr; gap: 4px; }
+  .cm-review__row { display: grid; grid-template-columns: 88px minmax(0, 1fr) 290px 840px; gap: 20px; align-items: center; padding: 3px 20px; min-height: 60px; }
+  .cm-review__row::before { inset: 3px; }
+  .cm-review__pick { position: relative; display: block; }
+  .cm-review__pick img { width: 70px; height: 52px; aspect-ratio: auto; object-fit: cover; margin: 0; border-width: 2px; }
+  .cm-review__row .cm-review__pick .cm-choice__mark { left: auto; right: -14px; top: auto; bottom: -8px; width: 36px; height: 36px; font-size: 16px; }
+  .cm-review__name { font-weight: 700; font-size: var(--cm-fs-label); line-height: 1.6; }
+  .cm-review__count { color: var(--cm-ai-ink); font-weight: 700; white-space: nowrap; }
+  .cm-minis { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .cm-mini { display: flex; align-items: center; gap: 4px; width: 204px; padding: 2px 8px 2px 4px; border: 2px solid var(--cm-sumi); border-radius: 4px; background: var(--cm-kinari-2); }
+  .cm-mini .cm-choice__mark { position: static; width: 36px; height: 36px; font-size: 16px; flex: none; }
+  .cm-mini img { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--cm-sumi); background: var(--cm-kinari); flex: none; }
+  .cm-mini__feel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .cm-mini .cm-lamps { gap: 2px; margin-left: auto; }
+  .cm-mini .cm-lamp { width: 30px; height: 30px; }
   .cm-review__sub { margin: 0 0 24px; color: var(--cm-kinari); font-size: var(--cm-fs-body); font-weight: 700; }
   .cm-review__cols .cm-closing { font-size: var(--cm-fs-body); }
   .cm-ctrl__state { white-space: nowrap; letter-spacing: -.06em; }

@@ -4,6 +4,7 @@
    【先生へ】書きかえるのは、すぐ下の LESSON だけで大丈夫です。
    - 漢字は「漢字（かんじ）」と書くと、自動で ふりがな（ruby）に なります。
    - 未来の文は「顔｜きもち｜あいての はんのう｜つぎの もんだい」を ｜ で区切ります。
+     5つめに あいての顔（nikko / futsuu / shinpai）を書くと、その1枚だけ表情を かえられます。
      顔: hotto dokidoki moyamoya iraira kanashii sukkiri jishin hazukashii
    - 場面を外したいときは use: false、とばすボタンを出すときは skippable: true。
    - order はカードの並び順（画面の左から）。おすすめは いつも d です。
@@ -144,7 +145,7 @@ const LESSON = {
               'moyamoya｜うそが きに なる。｜ともだちが もやもや した かお。｜ふたりの あいだが ぎくしゃく する。',
               'kanashii｜ともだちと はなしにくい。｜ともだちが ほかの 子（こ）と あそぶ。｜なかなおりの きっかけが ない。'] },
             b: { text: '正直（しょうじき）に「よごしちゃった」と いう', lamps: 2, future: [
-              'dokidoki｜どきどき した。｜ともだち「えー、ざんねん」と がっかり。｜まんがは よごれた まま。',
+              'dokidoki｜どきどき した。｜ともだち「えー、ざんねん」と がっかり。｜まんがは よごれた まま。｜shinpai',
               'hotto｜すこし ほっと した。｜ともだち「もう いいよ」。でも さびしそう。｜どう するか きまって いない。',
               'hotto｜こころは おちついて いる。｜ともだちとは ふつう。｜かりた ものに きを つけたい。'] },
             c: { text: 'かえさずに ともだちを さける', lamps: 1, future: [
@@ -202,7 +203,7 @@ const LESSON = {
               'hotto｜すこし すっきり した。｜ともだちは ふつう。｜さそいに こたえて いない。',
               'hotto｜こころは おちついて いる。｜ともだちは いつもどおり。｜また みおとす かも。'] },
             c: { text: 'へんじを しないで そのままに する', lamps: 1, future: [
-              'hotto｜いまは かんがえずに すむ。｜ともだち「むし されてる？」と かなしい。｜メッセージが たまって いく。',
+              'hotto｜いまは かんがえずに すむ。｜ともだち「むし されてる？」と かなしい。｜メッセージが たまって いく。｜shinpai',
               'moyamoya｜スマホを みるのが いや。｜ともだちが 学校（がっこう）で 目（め）を そらす。｜ごかいが 大（おお）きく なる。',
               'kanashii｜きまずい まま。｜ともだちが ほかの 子（こ）と あそぶ。｜なかなおりが むずかしい。'] },
             d: { text: 'あやまって、さそいに こたえる', lamps: 3, future: [
@@ -285,6 +286,8 @@ const LESSON = {
   review: {
     head: 'めいきゅうを ぬけたね！',
     picked: 'きみが えらんだ みち',
+    seenHead: 'みた みらい（1しゅうかんご）',
+    tipsHead: '3（さん）びょう まって かんがえる コツ',
     done: [
       '3（さん）びょう まって かんがえられたね。',
       '気持（きも）ちと あいての ようすを みられたね。',
@@ -389,7 +392,7 @@ const LESSON = {
   }
   function parseFuture(str) {
     const p = String(str).split('｜');
-    return { face: p[0], feel: p[1] || '', partner: p[2] || '', next: p[3] || '' };
+    return { face: p[0], feel: p[1] || '', partner: p[2] || '', next: p[3] || '', mood: p[4] || '' };
   }
   function partnerOf(scene, k) {
     return typeof scene.partner === 'string' ? scene.partner : (scene.partner && scene.partner[k]) || 'tomodachi';
@@ -568,7 +571,7 @@ const LESSON = {
   function viewFutureCard(scene, k, t, mini, lampsDark) {
     const f = parseFuture(scene.paths[k].future[t]);
     const faceName = LESSON.faces[f.face] || '';
-    const who = partnerOf(scene, k), mood = (LESSON.partnerMood[k] || [])[t] || 'futsuu';
+    const who = partnerOf(scene, k), mood = f.mood || (LESSON.partnerMood[k] || [])[t] || 'futsuu';
     const showLamps = t === 2;
     const label = mini ? LESSON.times[t] : scene.paths[k].text;
     const html = '<article class="cm-future cm-paper cm-fringe cm-fringe--side' + (mini ? ' cm-future--mini' : ' cm-flip') + '" data-k="' + k + '" data-lamps="' + scene.paths[k].lamps + '">' +
@@ -935,7 +938,7 @@ const LESSON = {
   function viewCompare(scene, keys, head) {
     const cards = keys.map((k) => viewFutureCard(scene, k, 2, true));
     return {
-      html: '<div class="cm-sheet"><p class="cm-sheet__head">' + rb(head) + '</p><div class="cm-compare">' +
+      html: '<div class="cm-sheet"><p class="cm-sheet__head">' + rb(head) + '</p><div class="cm-compare' + (keys.length === 1 ? ' cm-compare--one' : '') + '">' +
         cards.map((c) => c.html).join('') + '</div></div>',
       read: cards.map((c, i) => pathSpeak(keys[i]) + '。 ' + c.read + ' ランプは ' + scene.paths[keys[i]].lamps + 'こ。').join(' ')
     };
@@ -991,20 +994,28 @@ const LESSON = {
     const R = LESSON.review;
     if (page === 1) {
       let rows = '';
-      const reads = [kana(R.head), kana(R.picked)];
+      const reads = [kana(R.head)];
       steps().forEach((st, i) => scenesOf(i).forEach((s) => {
         const rec = state.record[s.id];
         if (!rec || !rec.first) return;
         const n = rec.seen.length;
-        rows += '<li class="cm-review__row cm-paper">' + markHTML(rec.first) +
-          img('choice-' + s.id + '-' + rec.first + '.png', '') +
-          '<div><span class="cm-review__name">' + rb(s.title) + '</span>' +
-          '<span class="cm-review__count">' + n + 'つ みたよ</span></div></li>';
+        // みた みらい: 見た道の 1しゅうかんごを 小さく並べる（比べない・点数にしない）
+        const minis = rec.seen.map((k) => {
+          const f = parseFuture(s.paths[k].future[2]);
+          return '<li class="cm-mini">' + markHTML(k) + img('face-' + f.face + '.png', '') +
+            '<span class="cm-mini__feel">' + esc(LESSON.faces[f.face] || '') + '</span>' + lampsHTML(s.paths[k].lamps) + '</li>';
+        }).join('');
+        rows += '<li class="cm-review__row cm-paper">' +
+          '<span class="cm-review__pick">' + img('choice-' + s.id + '-' + rec.first + '.png', '') + markHTML(rec.first) + '</span>' +
+          '<span class="cm-review__name">' + rb(s.title) + '</span>' +
+          '<span class="cm-review__count">' + n + 'つの みちを みたよ</span>' +
+          '<ul class="cm-minis">' + minis + '</ul></li>';
         reads.push(kana(s.title) + '。 ' + LESSON.marks[rec.first] + ' ' + letter(rec.first) + ' を えらんだね。 ' + n + 'つの みちを みたよ');
       }));
       setScreen({
-        html: '<h2 class="cm-review__head">' + rb(R.head) + '</h2><p class="cm-review__sub">' + rb(R.picked) + '</p>' +
-          '<ol class="cm-review__rows">' + rows + '</ol>',
+        html: '<h2 class="cm-review__head">' + rb(R.head) + '</h2>' +
+          '<div class="cm-review__heads"><p class="cm-review__sub">' + rb(R.picked) + '</p><p class="cm-review__sub">' + rb(R.seenHead) + '</p></div>' +
+          '<ol class="cm-review__rows cm-review__list">' + rows + '</ol>',
         label: 'ふりかえり 1/2', dot: null, read: reads.join('。 '),
         next: { label: 'つぎへ', fn: () => showReview(2) }
       });
@@ -1016,9 +1027,9 @@ const LESSON = {
       setScreen({
         html: '<h2 class="cm-review__head">' + rb(R.head) + '</h2><div class="cm-review__cols">' +
           '<div><ul class="cm-done-list cm-paper">' + done + '</ul><div class="cm-closing">' + closing + '</div></div>' +
-          '<div><p class="cm-review__sub">3（さん）びょう まって かんがえる コツ</p><ol class="cm-tips">' + tips + '</ol></div></div>',
+          '<div><p class="cm-review__sub">' + rb(R.tipsHead) + '</p><ol class="cm-tips">' + tips + '</ol></div></div>',
         label: 'ふりかえり 2/2', dot: null,
-        read: [R.head].concat(R.done, ['3びょう まって かんがえる コツ'], R.tips.map((t, i) => (i + 1) + '、' + t.text), R.closing).map(kana).join(' '),
+        read: [R.head].concat(R.done, [R.tipsHead], R.tips.map((t, i) => (i + 1) + '、' + t.text), R.closing).map(kana).join(' '),
         sub: { label: 'もういちど', fn: () => { resetRun(); showMap(); } },
         next: { label: 'おわる', fn: showTitle }
       });

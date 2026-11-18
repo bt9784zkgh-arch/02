@@ -349,7 +349,7 @@ button { font: inherit; color: inherit; }
   color: var(--cm-kinari); font-size: 40px; font-weight: 700; line-height: 1;
 }
 .cm-mark--a { background-image: url("assets/svg/mark-a.svg"); }
-.cm-mark--b { background-image: url("assets/svg/mark-b.svg"); padding-top: 16%; }
+.cm-mark--b { background-image: url("assets/svg/mark-b.svg"); padding-top: .45em; }
 .cm-mark--c { background-image: url("assets/svg/mark-c.svg"); }
 .cm-mark--d { background-image: url("assets/svg/mark-d.svg"); }
 .cm-choice__key {                   /* キーボードの番号 */

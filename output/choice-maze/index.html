@@ -16,12 +16,14 @@
   .cm-screen.is-demo .cm-choice, .cm-screen.is-demo .cm-other__btns .cm-btn { pointer-events: none; }
   img.is-missing { background: var(--cm-kinari-2); }
   .cm-main:focus { outline: none; }
+  .cm-mark--b { padding-top: .45em; }   /* % だと親の幅で決まってしまうので em にする */
   .cm-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .cm-future--mini .cm-future__row--noicon { grid-template-columns: 1fr; }
   .cm-future--mini { padding: 36px 32px 24px; }
   .cm-future--mini .cm-future__body { gap: 12px; }
   .cm-ctrl.is-off .ic-wave, .cm-ctrl:not(.is-off) .ic-mute { display: none; }
   .cm-ctrl.is-low { background: var(--cm-kinari-2); }
+  .cm-ctrl[disabled] { opacity: .45; cursor: default; }
   .cm-ctrl.is-low .ic-wave2 { display: none; }
   .cm-flip { animation: cm-flip .4s ease-out; transform-origin: 50% 50%; }
   @keyframes cm-flip { from { transform: perspective(1600px) rotateY(80deg); opacity: .2; } to { transform: none; opacity: 1; } }
@@ -52,12 +54,14 @@
   .cm-sheet { display: flex; flex-direction: column; align-items: center; gap: 24px; }
   .cm-sheet__head { margin: 0; color: var(--cm-kinari); font-family: var(--cm-font-hand); font-weight: 600; font-size: 52px; line-height: 1.3; }
   /* ふり返り 1ページ目: 絵を左、文を右にして 4列×2段に入れる */
-  .cm-review__row { display: grid; grid-template-columns: 168px 1fr; gap: 16px; align-items: center; }
-  .cm-review__row img { width: 168px; margin: 0; }
-  .cm-review__seen { display: flex; gap: 4px; margin-top: 4px; }
-  .cm-review__seen .cm-choice__mark { position: static; width: 44px; height: 44px; font-size: 20px; }
-  .cm-review__name { display: block; font-weight: 700; font-size: var(--cm-fs-label); }
+  .cm-review__head { margin-bottom: 8px; }
+  .cm-review__row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; padding: 22px 20px 18px; }
+  .cm-review__row img { width: 150px; margin: 0; }
+  .cm-review__name { display: block; font-weight: 700; font-size: var(--cm-fs-label); line-height: 1.5; }
+  .cm-review__count { display: block; margin-top: 4px; color: var(--cm-ai-ink); font-weight: 700; }
   .cm-review__sub { margin: 0 0 24px; color: var(--cm-kinari); font-size: var(--cm-fs-body); font-weight: 700; }
+  .cm-review__cols .cm-closing { font-size: var(--cm-fs-body); }
+  .cm-ctrl__state { white-space: nowrap; letter-spacing: -.06em; }
   .cm-tip { position: relative; }
   /* ステップ3 おてほん: きもちに名前をつける */
   .cm-name { display: flex; align-items: center; justify-content: center; gap: 64px; height: 100%; }

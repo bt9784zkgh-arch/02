@@ -999,9 +999,8 @@ const LESSON = {
         rows += '<li class="cm-review__row cm-paper">' + markHTML(rec.first) +
           img('choice-' + s.id + '-' + rec.first + '.png', '') +
           '<div><span class="cm-review__name">' + rb(s.title) + '</span>' +
-          '<span class="cm-review__seen" aria-hidden="true">' + rec.seen.map(markHTML).join('') + '</span>' +
-          '<span>' + n + 'つの みちを みたよ</span></div></li>';
-        reads.push(kana(s.title) + '。 ' + n + 'つの みちを みたよ');
+          '<span class="cm-review__count">' + n + 'つ みたよ</span></div></li>';
+        reads.push(kana(s.title) + '。 ' + LESSON.marks[rec.first] + ' ' + letter(rec.first) + ' を えらんだね。 ' + n + 'つの みちを みたよ');
       }));
       setScreen({
         html: '<h2 class="cm-review__head">' + rb(R.head) + '</h2><p class="cm-review__sub">' + rb(R.picked) + '</p>' +

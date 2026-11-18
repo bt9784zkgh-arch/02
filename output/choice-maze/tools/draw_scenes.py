@@ -538,8 +538,9 @@ class Person:
         if o.get('hood'):
             # hood lying on the shoulders (collar)
             nk = self.loc(0, tl - 0.02)
-            cv.shape(ell(nk[0] - self.dir * 0.08 * H, nk[1], 0.38 * H, 0.14 * H, n=36), fill=o['top'])
-            cv.shape(ell(nk[0] - self.dir * 0.08 * H, nk[1] + 0.01 * H, 0.24 * H, 0.07 * H, n=30),
+            rt = self.lean * (self.dir if self.dir else 1)
+            cv.shape(ell(nk[0] - self.dir * 0.08 * H, nk[1], 0.38 * H, 0.14 * H, rot=rt, n=36), fill=o['top'])
+            cv.shape(ell(nk[0] - self.dir * 0.08 * H, nk[1] + 0.01 * H, 0.24 * H, 0.07 * H, rot=rt, n=30),
                      fill=o['top2'], lw=lw * 0.6)
             # drawstrings
             for s in (-0.08, 0.1):
@@ -933,6 +934,28 @@ def door(cv, x0, y0, x1, y1, open_frac=0.0, dark=False, knob_side='r', color='ki
         cv.shape(ell(kx, (y0 + y1) / 2 + 10, 9 * lw / 6, 9 * lw / 6, n=16), fill='kin', lw=lw * 0.6)
 
 
+def shards(cv, cx, cy, sc=1.0, marks=True):
+    """broken cup: a bottom piece + 3 shards, light fill so they read on the dark rug."""
+    cv.shadow(cx, cy + 14 * sc, 70 * sc, 10 * sc, alpha=0.18)
+    glass = mix('kinari', 'haiao', 0.35)
+    # bottom of the cup (still round)
+    base = [(cx - 22 * sc, cy - 6 * sc), (cx - 10 * sc, cy - 22 * sc), (cx + 2 * sc, cy - 12 * sc), (cx + 12 * sc, cy - 24 * sc),
+            (cx + 22 * sc, cy - 6 * sc), (cx + 18 * sc, cy + 12 * sc), (cx - 18 * sc, cy + 12 * sc)]
+    cv.shape(base, fill=glass, lcolor='kinink', lw=cv.lw * 0.8, amp=0.3)
+    cv.line([(cx - 16 * sc, cy + 4 * sc), (cx + 16 * sc, cy + 4 * sc)], width=cv.lw * 0.5, color='kinink', amp=0.2)
+    pcs = [((-52, 8), [(0, 0), (20, -12), (16, 10)]), ((44, 2), [(0, 0), (22, -4), (8, 16)]),
+           ((-30, -30), [(0, 0), (14, -10), (18, 4)]), ((34, -30), [(0, 0), (10, -8), (14, 6)])]
+    for (ox, oy), pts in pcs:
+        pp = [(cx + (ox + x) * sc, cy + (oy + y) * sc) for x, y in pts]
+        cv.shape(pp, fill=glass, lcolor='kinink', lw=cv.lw * 0.7, amp=0.2)
+        cv.line([pp[0], pp[1]], width=cv.lw * 0.35, color='kinari', amp=0.1)
+    if marks:
+        for a in (200, 235, 305, 340):
+            ang = math.radians(a)
+            cv.line([(cx + 80 * sc * math.cos(ang), cy + 46 * sc * math.sin(ang)),
+                     (cx + 100 * sc * math.cos(ang), cy + 58 * sc * math.sin(ang))], width=cv.lw * 0.7, color='kinari')
+
+
 def desk(cv, x0, x1, ytop, yfloor, depth=40):
     lw = cv.lw
     wood = mix('karashi', 'kinink', 0.25)
@@ -1216,18 +1239,7 @@ def scene_s1_2(path):
     cv.dot(sx + 8, sy + 2, 5, color='kinari')
     rug(cv, FLOOR, SH, mode='diamond')
     # shards on floor
-    sh = [((690, 610), [(0, 0), (40, -16), (30, 22)]), ((770, 640), [(0, 0), (34, 6), (10, 30), (-10, 14)]),
-          ((640, 655), [(0, 0), (28, -8), (20, 18)]), ((735, 590), [(0, 0), (18, -14), (24, 8)])]
-    cv.shadow(715, 640, 110, 20, alpha=0.15)
-    for (ox, oy), pts in sh:
-        pp = [(ox + x * 1.3, oy + y * 1.3) for x, y in pts]
-        cv.shape(pp, fill=mix('haiao', 'kinari', 0.55), lcolor='kinink', lw=4, amp=0.4)
-        cv.line([pp[0], pp[1]], width=2.5, color='kinari', amp=0.2)
-    # little impact marks around shards
-    for a in (200, 240, 300, 340):
-        ang = math.radians(a)
-        cv.line([(715 + 140 * math.cos(ang), 625 + 60 * math.sin(ang)),
-                 (715 + 170 * math.cos(ang), 625 + 75 * math.sin(ang))], width=4, color='kinink')
+    shards(cv, 735, 625, 2.2)
     kid(cv, 450, 690, 150, facing='r', eyes='wide', brows='worry', mouth='o',
         arms={'L': dict(hand=(-0.15, 0.6), bend=0.5), 'R': dict(hand=(0.15, 0.6), bend=-0.5)},
         look=(0.03, 0.06), extras=('panic',))
@@ -1396,7 +1408,8 @@ def scene_s3_2(path):
     wall(cv, FLOOR, color=mix('ai2', 'ai', 0.4), panel=False)
     cv.line([(-10, FLOOR - 60), (SW + 10, FLOOR - 60)], width=4, color=mix('ai2', 'kinari', 0.2))
     # warm lamp so it is not too dark
-    cv.glow(1120, 220, 220, 'kin', alpha=0.22)
+    cv.fill(ell(1120, 230, 200, 170, n=60), mix('ai2', 'kin', 0.22), tex=0.04, edge=False)
+    cv.fill(ell(1120, 230, 120, 100, n=60), mix('ai2', 'kin', 0.38), tex=0.04, edge=False)
     cv.tube([(1120, 260), (1120, FLOOR - 10)], 10, 'kinink')
     cv.shape([(1060, 260), (1180, 260), (1150, 180), (1090, 180)], fill='kin')
     window(cv, 120, 80, 330, 270, night=True)
@@ -1432,388 +1445,393 @@ def cbase(seed, wallc='kinari', mode='diamond', floor=CF):
     return cv
 
 
-KH = 92   # kid head size in choices
-KG = 440  # kid ground y in choices
+KH = 112   # kid head size in choices
+KG = 454   # kid ground y in choices
+AH = 100   # adult / partner head size
+AG = 458
 
 
-def teacher_edge(cv, x=575, mood='futsuu', facing='l', H=86, gy=448, arms=None):
+def bow_kid(cv, cx, H=KH, gy=KG, arms=None, **kw):
+    """deep bow seen from the side: straight legs, torso tipped ~50 deg, head low, eyes shut."""
+    return kid(cv, cx, gy, H, facing='r', lean=52, head_drop=0.12, eyes='down', mouth='line', look=(0.08, 0.06),
+               brows=None, arms=arms or {'L': dict(hand=(0.08, 0.72)), 'R': dict(hand=(0.14, 0.72))}, **kw)
+
+
+def partner(cv, kind, x, mood='futsuu', facing='l', H=AH, gy=AG, arms=None, **kw):
     m = {'futsuu': ('dot', None, 'line'), 'nikko': ('happy', None, 'smile'), 'shinpai': ('dot', 'worry', 'wave')}[mood]
-    return person(cv, 'sensei', x, gy, H, facing=facing, eyes=m[0], brows=m[1], mouth=m[2], arms=arms or {})
+    return person(cv, kind, x, gy, H, facing=facing, eyes=m[0], brows=m[1], mouth=m[2], arms=arms or {}, **kw)
 
 
-def ch_s1_1_a(path):
+def wave_marks(cv, x, y, r=30):
+    for k in range(2):
+        cv.line(ell(x, y, r + k * 12, r + k * 12, 200, 245, n=6), width=3)
+        cv.line(ell(x, y, r + k * 12, r + k * 12, 295, 340, n=6), width=3)
+
+
+# ---- s1-1 宿題をわすれた
+def ch_s1_1_a(path):   # うそ: 目をそらし、手を後ろにかくす
     cv = cbase(201)
-    kid(cv, 300, KG, KH, facing='l', eyes='dot', look=(-0.08, 0.0), brows='worry', mouth='wave',
-        arms={'L': dict(hand=(0.25, 0.55), behind=True, handshape='none'),
-              'R': dict(hand=(-0.25, 0.55), behind=True, handshape='none')},
-        extras=('sweat2', 'speech'))
-    # notebook hidden behind back peeks out
+    def notebook(p):   # a corner of the homework notebook peeking out behind the back
+        cv.shape(rot_pts(rrect(330, 286, 396, 336, 4), 363, 311, -16), fill='kinari', lw=3.5)
+        cv.line([(340, 306), (386, 294)], width=2.5, color='kinink')
+    kid(cv, 290, KG, KH, facing='l', eyes='dot', look=(-0.1, -0.02), brows='worry', mouth='wave',
+        arms={'L': dict(hand=(0.3, 0.55), behind=True, handshape='none'),
+              'R': dict(hand=(-0.3, 0.55), behind=True, handshape='none')},
+        extras=('sweat2', 'speech'), pb=notebook)
     cv.save(path)
 
 
-def ch_s1_1_b(path):
+def ch_s1_1_b(path):   # 正直: 先生に向かって話す
     cv = cbase(202)
-    teacher_edge(cv, 520, 'futsuu', arms={'L': dict(hand=(-0.2, 0.7)), 'R': dict(hand=(0.1, 0.8))})
-    kid(cv, 230, KG, KH, facing='r', eyes='dot', brows=None, mouth='talk',
+    partner(cv, 'sensei', 500, arms={'L': dict(hand=(-0.2, 0.7)), 'R': dict(hand=(0.1, 0.8))})
+    kid(cv, 220, KG, KH, facing='r', eyes='dot', mouth='talk',
         arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.1, 0.8))}, extras=('speech',))
     cv.save(path)
 
 
-def ch_s1_1_c(path):
+def ch_s1_1_c(path):   # にげる: ドアからそっと出ていく後ろ姿
     cv = cbase(203)
-    door(cv, 360, 90, 540, CF, open_frac=0.6, knob_side='r')
-    kid(cv, 430, KG - 6, KH * 0.95, facing='back',
+    door(cv, 330, 70, 530, CF, open_frac=0.6, knob_side='r')
+    kid(cv, 420, KG - 8, KH * 0.95, facing='back',
         arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.25, 0.65))},
-        legs={'L': (-0.3, 1.0), 'R': (0.25, 0.98)})
-    # tiptoe marks
-    for xx in (240, 300):
-        cv.line(ell(xx, 430, 14, 6, 180, 360, n=8), width=3, color='kinink')
+        legs={'L': (-0.3, 1.0), 'R': (0.25, 0.96)})
+    for xx, yy in ((200, 452), (270, 440)):
+        cv.shape(ell(xx, yy, 16, 7, n=12), fill='kinari2', lw=2.5)
+    for yy in (220, 270, 320):
+        cv.line([(300, yy), (250, yy)], width=3.5)
     cv.save(path)
 
 
-def ch_s1_1_d(path):
+def ch_s1_1_d(path):   # あやまって、いつ出せるか伝える
     cv = cbase(204)
-    mark = calendar(cv, 400, 60, 200, 170, mark=(3, 1), today=(2, 1))
-    p = kid(cv, 220, KG, KH, facing='r', lean=38, head_drop=0.15, eyes='down', mouth='line', look=(0.06, 0.05),
-            arms={'L': dict(hand=(0.05, 0.7)), 'R': dict(hand=(1.3, -0.7), bend=-0.4, handshape='point',
-                                                        pdir=(1, -0.6))})
+    calendar(cv, 420, 150, 180, 150, mark=(3, 1), today=(2, 1))
+    bow_kid(cv, 200, arms={'L': dict(hand=(0.08, 0.72)),
+                           'R': dict(hand=(0.95, 0.0), bend=-0.2, handshape='point', pdir=(1, -0.55))})
     cv.save(path)
 
 
-def ch_s1_2_a(path):
+# ---- s1-2 コップをわった
+def ch_s1_2_a(path):   # ごまかす: 手をふって知らないふり
     cv = cbase(211)
-    # shards on floor near
-    for (ox, oy) in ((470, 430), (510, 445)):
-        cv.shape([(ox, oy), (ox + 26, oy - 10), (ox + 18, oy + 12)], fill=mix('haiao', 'kinari', 0.55), lw=3,
-                 lcolor='kinink')
-    kid(cv, 300, KG, KH, facing='front', eyes='dot', look=(-0.1, 0), brows='up', mouth='smile',
-        arms={'L': dict(hand=(-0.55, -0.45), bend=-0.5), 'R': dict(hand=(0.55, -0.45), bend=0.5)},
-        extras=('sweat',))
-    # waving motion marks
-    for cx in (175, 425):
-        for k in range(2):
-            cv.line(ell(cx, 225, 34 + k * 12, 34 + k * 12, 200, 250, n=6), width=3)
-            cv.line(ell(cx, 225, 34 + k * 12, 34 + k * 12, 290, 340, n=6), width=3)
+    shards(cv, 520, 440, 0.7, marks=False)
+    kid(cv, 280, KG, KH, facing='front', eyes='dot', look=(-0.12, -0.02), brows='worry', mouth='smile',
+        arms={'L': dict(hand=(-0.32, -0.02), bend=-0.8), 'R': dict(hand=(0.32, -0.02), bend=0.8)},
+        extras=('sweat2',))
+    wave_marks(cv, 190, 175)
+    wave_marks(cv, 370, 175)
     cv.save(path)
 
 
-def ch_s1_2_b(path):
+def ch_s1_2_b(path):   # 正直: 家の人に向かって話す
     cv = cbase(212)
-    person(cv, 'ie', 520, 448, 86, facing='l', mouth='line',
-           arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.1, 0.8))})
-    kid(cv, 240, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
-        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.25, 0.6))}, extras=('speech',))
-    for (ox, oy) in ((370, 440),):
-        cv.shape([(ox, oy), (ox + 26, oy - 10), (ox + 18, oy + 12)], fill=mix('haiao', 'kinari', 0.55), lw=3,
-                 lcolor='kinink')
+    partner(cv, 'ie', 500, arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.1, 0.8))})
+    kid(cv, 220, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
+        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.1, 0.8))}, extras=('speech',))
+    shards(cv, 360, 446, 0.55, marks=False)
     cv.save(path)
 
 
-def ch_s1_2_c(path):
+def ch_s1_2_c(path):   # 自分のへやにもどる: ドアをしめる
     cv = cbase(213)
-    # door frame on right; kid half hidden behind closing door
-    x0, x1 = 300, 470
-    cv.shape([(x0 - 14, 70), (x1 + 14, 70), (x1 + 14, CF), (x0 - 14, CF)], fill=mix('kinink', 'kinari', 0.2))
-    cv.shape([(x0, 84), (x1, 84), (x1, CF), (x0, CF)], fill='ai')
-    kid(cv, 345, KG - 70, KH * 0.9, facing='l', eyes='dot', brows='worry', mouth='frown', look=(0, 0.04),
+    x0, x1 = 290, 470
+    cv.shape([(x0 - 14, 50), (x1 + 14, 50), (x1 + 14, CF), (x0 - 14, CF)], fill=mix('kinink', 'kinari', 0.2))
+    cv.shape([(x0, 64), (x1, 64), (x1, CF), (x0, CF)], fill='ai')
+    kid(cv, 340, KG - 60, KH * 0.92, facing='l', eyes='dot', brows='worry', mouth='frown', look=(0, 0.04),
         arms={'L': dict(hand=(-0.55, 0.15), bend=-0.3), 'R': dict(hand=(0.1, 0.8))})
-    # the door leaf, swinging shut from the right covering half of the kid
-    cv.shape([(x0 + 70, 80), (x1 + 4, 84), (x1 + 4, CF), (x0 + 70, CF + 6)], fill=mix('karashi', 'kinink', 0.35))
-    cv.shape(ell(x0 + 92, 250, 9, 9, n=16), fill='kin', lw=3)
-    # motion lines of closing
-    for yy in (150, 220, 290):
-        cv.line([(x1 + 30, yy), (x1 + 70, yy)], width=3.5)
+    cv.shape([(x0 + 64, 60), (x1 + 4, 64), (x1 + 4, CF), (x0 + 64, CF + 6)], fill=mix('karashi', 'kinink', 0.35))
+    cv.line(rrect(x0 + 84, 90, x1 - 16, 200, 4), closed=True, width=3, color=mix('kinink', 'sumi', 0.3))
+    cv.shape(ell(x0 + 86, 240, 10, 10, n=16), fill='kin', lw=3)
+    for yy in (130, 210, 290):
+        cv.line([(x1 + 34, yy), (x1 + 80, yy)], width=3.5)
     cv.save(path)
 
 
-def ch_s1_2_d(path):
+def ch_s1_2_d(path):   # あやまって、いっしょにかたづける
     cv = cbase(214)
-    # broom (family) and dustpan (kid)
+
     def broom(p):
         h = p.hand('L')
-        cv.tube([(h[0] + 30, h[1] - 90), (h[0] - 30, h[1] + 90)], 9, 'kinink', lw=3)
-        cv.shape([(h[0] - 58, h[1] + 85), (h[0] - 4, h[1] + 92), (h[0] - 16, h[1] + 140), (h[0] - 82, h[1] + 128)],
+        cv.tube([(h[0] + 34, h[1] - 100), (h[0] - 30, h[1] + 96)], 10, 'kinink', lw=3)
+        cv.shape([(h[0] - 62, h[1] + 90), (h[0] - 2, h[1] + 98), (h[0] - 16, h[1] + 150), (h[0] - 88, h[1] + 136)],
                  fill='karashi', lw=4)
         for k in range(5):
-            cv.line([(h[0] - 60 + k * 11, h[1] + 98), (h[0] - 70 + k * 12, h[1] + 132)], width=2.5, color='kinink')
-    person(cv, 'ie', 470, 448, 86, facing='l', mouth='smile', eyes='dot',
+            cv.line([(h[0] - 64 + k * 12, h[1] + 104), (h[0] - 76 + k * 13, h[1] + 142)], width=2.5, color='kinink')
+    person(cv, 'ie', 500, AG, AH, facing='l', mouth='smile', eyes='dot',
            arms={'L': dict(hand=(-0.4, 0.35), bend=-0.4), 'R': dict(hand=(-0.65, 0.3), bend=0.3, front=True)},
            pf=broom)
+
     def pan(p):
         h = p.hand('R')
-        cv.shape([(h[0] + 10, h[1] + 40), (h[0] + 90, h[1] + 30), (h[0] + 96, h[1] + 70), (h[0] + 10, h[1] + 78)],
+        cv.shape([(h[0] + 10, h[1] + 44), (h[0] + 100, h[1] + 32), (h[0] + 106, h[1] + 76), (h[0] + 10, h[1] + 86)],
                  fill='akane2', lw=4)
-        cv.tube([h, (h[0] + 14, h[1] + 44)], 8, 'akane', lw=3)
-    kid(cv, 200, KG, KH, facing='r', lean=18, eyes='dot', look=(0.04, 0.06), mouth='line',
+        cv.tube([h, (h[0] + 14, h[1] + 48)], 9, 'akane', lw=3)
+    kid(cv, 190, KG, KH, facing='r', lean=18, eyes='dot', look=(0.04, 0.06), mouth='line',
         arms={'L': dict(hand=(0.2, 0.6)), 'R': dict(hand=(0.55, 0.5), bend=0.3)}, pf=pan)
-    for (ox, oy) in ((330, 440), (360, 452)):
-        cv.shape([(ox, oy), (ox + 18, oy - 8), (ox + 12, oy + 8)], fill=mix('haiao', 'kinari', 0.55), lw=3,
-                 lcolor='kinink')
+    shards(cv, 352, 444, 0.4, marks=False)
     cv.save(path)
 
 
-def ch_s2_1_a(path):
+# ---- s2-1 かりたまんがをよごした
+def ch_s2_1_a(path):   # ごまかす: まんがを渡しながら目をそらす
     cv = cbase(221)
+    partner(cv, 'tomodachi', 560, H=AH * 0.95, arms={'L': dict(hand=(-0.55, 0.4), bend=-0.3), 'R': dict(hand=(0.1, 0.8))})
+
     def bk(p):
         h = p.hand('R')
-        manga(cv, h[0] + 34, h[1] - 10, 66, 90, rot=-12)
-    kid(cv, 260, KG, KH, facing='r', look=(-0.2, -0.02), eyes='dot', brows='worry', mouth='wave',
-        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.75, 0.25), bend=0.4)}, pf=bk, extras=('sweat',))
-    # friend's hand reaching in from right edge
-    cv.tube([(660, 300), (520, 315)], 22, 'haiao', lw=4)
-    cv.shape(ell(512, 316, 12, 12, n=16), fill='skin', lw=3)
+        manga(cv, h[0] + 36, h[1] - 10, 70, 96, rot=-12)
+    kid(cv, 230, KG, KH, facing='r', look=(-0.26, -0.03), eyes='dot', brows='worry', mouth='wave',
+        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.85, 0.3), bend=0.4)}, pf=bk, extras=('sweat',))
     cv.save(path)
 
 
-def ch_s2_1_b(path):
+def ch_s2_1_b(path):   # 正直: まんがを両手で持って話す
     cv = cbase(222)
+    partner(cv, 'tomodachi', 540, H=AH * 0.95)
+
     def bk(p):
         h1, h2 = p.hand('L'), p.hand('R')
-        manga(cv, (h1[0] + h2[0]) / 2, (h1[1] + h2[1]) / 2 - 20, 72, 98, rot=-4)
-        cv.shape(ell(h1[0], h1[1], 9, 9, n=14), fill='skin', lw=3)
-        cv.shape(ell(h2[0], h2[1], 9, 9, n=14), fill='skin', lw=3)
-    person(cv, 'tomodachi', 540, 448, 86, facing='l', mouth='line')
-    kid(cv, 270, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
+        manga(cv, (h1[0] + h2[0]) / 2, (h1[1] + h2[1]) / 2 - 22, 76, 104, rot=-4)
+        cv.shape(ell(h1[0], h1[1], 10, 10, n=14), fill='skin', lw=3)
+        cv.shape(ell(h2[0], h2[1], 10, 10, n=14), fill='skin', lw=3)
+    kid(cv, 240, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
         arms={'L': dict(hand=(0.55, 0.42), bend=-0.3, front=True), 'R': dict(hand=(0.75, 0.42), bend=0.3)},
         pf=bk, extras=('speech',))
     cv.save(path)
 
 
-def ch_s2_1_c(path):
-    cv = cbase(223, wallc=mix('kinari', 'kinari2', 0.5))
-    # hallway corner: a wall block on the right covering the kid
-    kid(cv, 330, KG, KH, facing='r', eyes='dot', look=(0.06, 0), brows='worry', mouth='line',
-        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.4, 0.2), bend=0.5)})
-    cx = 360
-    cv.shape([(cx, -10), (CW + 10, -10), (CW + 10, CH + 10), (cx, CH + 10)], fill='kinari2', tex=0.08)
-    cv.hatch([(cx, -10), (cx + 40, -10), (cx + 40, CH + 10), (cx, CH + 10)], color='kinink', gap=8, angle=80, alpha=0.3)
-    cv.line([(cx + 120, 40), (cx + 240, 40), (cx + 240, 140), (cx + 120, 140)], closed=True, width=4, color='kinink')
-    # fingers on the edge of the corner
-    cv.shape(ell(cx + 2, 300, 12, 14, n=16), fill='skin', lw=3)
-    # friend far away (small) on the left
-    person(cv, 'tomodachi', 110, 400, 46, facing='r', mouth='line', blush=False)
-    cv.save(path)
-
-
-def ch_s2_1_d(path):
-    cv = cbase(224)
-    person(cv, 'tomodachi', 510, 448, 86, facing='l', eyes='happy', mouth='smile', head_drop=0.05,
-           arms={'L': dict(hand=(-0.2, 0.7)), 'R': dict(hand=(0.1, 0.8))})
-    # nod marks
-    cv.line(ell(510, 150, 70, 30, 200, 340, n=10), width=3.5)
-    kid(cv, 230, KG, KH, facing='r', lean=38, head_drop=0.15, eyes='down', mouth='line', look=(0.06, 0.05),
-        arms={'L': dict(hand=(0.05, 0.75)), 'R': dict(hand=(0.1, 0.75))})
-    cv.save(path)
-
-
-def ch_s2_2_a(path):
-    cv = cbase(231)
-    kid(cv, 310, KG, KH, facing='r', eyes='happy', brows='worry', mouth='smile', look=(-0.05, 0),
-        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.15, -0.95), bend=0.9)}, extras=('sweat2', 'speech'))
-    # scratching marks
+def ch_s2_1_c(path):   # かえさずにさける: 廊下のかどにかくれる
+    cv = cbase(223)
+    # far friend on the right (small, in the hallway)
+    person(cv, 'tomodachi', 520, 412, 48, facing='l', mouth='line', blush=False)
+    # kid behind the corner (left), only half of the face shows
+    wx = 250
+    kid(cv, wx - 22, KG, KH, facing='r', eyes='dot', look=(0.08, 0), brows='worry', mouth='line',
+        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.3, 0.25), bend=0.5)})
+    cv.shape([(-20, -10), (wx, -10), (wx, CH + 10), (-20, CH + 10)], fill='kinari2', tex=0.08)
+    cv.hatch([(wx - 50, -10), (wx, -10), (wx, CH + 10), (wx - 50, CH + 10)], color='kinink', gap=8, angle=80, alpha=0.3)
+    cv.line([(wx - 200, 380), (wx, 380)], width=4, color=mix('kinari2', 'kinink', 0.5))
+    # fingers gripping the corner
     for k in range(3):
-        cv.line([(360 + k * 10, 80 + k * 4), (372 + k * 10, 70 + k * 4)], width=3)
+        cv.shape(ell(wx + 6, 268 + k * 16, 10, 8, n=14), fill='skin', lw=3)
     cv.save(path)
 
 
-def ch_s2_2_b(path):
+def ch_s2_1_d(path):   # あやまって、いっしょにきめる
+    cv = cbase(224)
+    partner(cv, 'tomodachi', 500, 'nikko', H=AH * 0.95, head_drop=0.06)
+    cv.line(ell(500, 128, 70, 26, 200, 340, n=10), width=3.5)
+    cv.line([(560, 100), (566, 118)], width=3.5)
+    cv.line([(440, 100), (434, 118)], width=3.5)
+    bow_kid(cv, 220)
+    cv.save(path)
+
+
+# ---- s2-2 部活の当番をわすれた
+def ch_s2_2_a(path):   # 言いわけ: 頭をかく
+    cv = cbase(231)
+    kid(cv, 300, KG, KH, facing='r', eyes='happy', brows='worry', mouth='smile', look=(-0.05, 0),
+        arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.12, -1.0), bend=0.9)}, extras=('sweat2', 'speech'))
+    for k in range(3):
+        cv.line([(352 + k * 11, 60 + k * 4), (366 + k * 11, 48 + k * 4)], width=3)
+    cv.save(path)
+
+
+def ch_s2_2_b(path):   # 正直: なかまの前で話す
     cv = cbase(232)
-    person(cv, 'nakama', 470, 448, 80, facing='l', mouth='line')
-    person(cv, 'nakama2', 580, 456, 80, facing='l', mouth='line')
-    kid(cv, 200, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
+    partner(cv, 'nakama', 450, H=AH * 0.9)
+    partner(cv, 'nakama2', 570, H=AH * 0.9, gy=AG + 6)
+    kid(cv, 190, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
         arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.1, 0.8))}, extras=('speech',))
     cv.save(path)
 
 
-def ch_s2_2_c(path):
+def ch_s2_2_c(path):   # 部活を休む: 体育館（左）と反対の右へ歩く
     cv = cbase(233)
-    # gym doorway at far left edge, kid walking away to the right
-    door(cv, -20, 120, 120, CF, open_frac=1.0)
-    ball(cv, 50, 330, 26)
-    kid(cv, 400, KG, KH, facing='r', eyes='dot', look=(0.05, 0.03), mouth='line',
-        arms={'L': dict(hand=(-0.35, 0.65)), 'R': dict(hand=(0.35, 0.65))},
-        legs={'L': dict(foot=(-0.35, 1.0)), 'R': dict(foot=(0.38, 0.97))})
-    # walking direction: footprints + motion lines behind
-    for k, xx in enumerate((200, 260)):
-        cv.shape(ell(xx, 445 - k * 4, 14, 6, n=12), fill='kinari2', lw=2.5)
-    for yy in (230, 270, 310):
-        cv.line([(300, yy), (250, yy)], width=3.5)
+    door(cv, -20, 100, 130, CF, open_frac=1.0)
+    ball(cv, 56, 330, 28)
+    kid(cv, 430, KG, KH, facing='r', eyes='dot', look=(0.05, 0.03), mouth='line', brows='worry',
+        arms={'L': dict(hand=(-0.4, 0.62)), 'R': dict(hand=(0.4, 0.62))},
+        legs={'L': dict(foot=(-0.42, 1.0), knee=(-0.12, 0.55)), 'R': dict(foot=(0.42, 0.96), knee=(0.25, 0.5))})
+    for k, xx in enumerate((210, 280)):
+        cv.shape(ell(xx, 450 - k * 4, 16, 7, n=12), fill='kinari2', lw=2.5)
+    for yy in (220, 270, 320):
+        cv.line([(310, yy), (255, yy)], width=3.5)
     cv.save(path)
 
 
-def ch_s2_2_d(path):
+def ch_s2_2_d(path):   # あやまって、かたづけを引きうける（2コマ）
     cv = cbase(234)
-    # two panels side by side, separated by a stitched gold line
-    kid(cv, 160, KG, 80, facing='r', lean=38, head_drop=0.15, eyes='down', mouth='line', look=(0.06, 0.05),
-        arms={'L': dict(hand=(0.05, 0.75)), 'R': dict(hand=(0.1, 0.75))})
-    person(cv, 'nakama', 268, 448, 62, facing='l', eyes='dot', mouth='smile', blush=False)
-    for yy in range(20, CH - 10, 22):
-        cv.line([(320, yy), (320, yy + 12)], width=4, color='kinink', amp=0.2)
-    # right panel: pushing the ball cage
-    bx = 525
-    cage = [(bx - 70, 310), (bx + 70, 310), (bx + 64, 420), (bx - 64, 420)]
-    for b in ((bx - 30, 330), (bx + 26, 326), (bx, 300)):
-        ball(cv, b[0], b[1], 26)
+    H = 84
+    bow_kid(cv, 78, H=76, gy=448)
+    partner(cv, 'nakama', 262, 'nikko', H=66, gy=452)
+    for yy in range(16, CH - 10, 24):
+        cv.line([(318, yy), (318, yy + 13)], width=4, color='kinink', amp=0.2)
+    bx = 540
+    cage = [(bx - 72, 300), (bx + 72, 300), (bx + 66, 418), (bx - 66, 418)]
+    for b in ((bx - 32, 320), (bx + 28, 316), (bx, 290)):
+        ball(cv, b[0], b[1], 28)
     cv.shape(cage, fill=None, lw=4)
     for k in range(1, 5):
-        cv.line([(bx - 70 + k * 28, 310), (bx - 66 + k * 27, 420)], width=3)
-    cv.line([(bx - 68, 365), (bx + 68, 365)], width=3)
+        cv.line([(bx - 72 + k * 29, 300), (bx - 66 + k * 26.5, 418)], width=3)
+    cv.line([(bx - 70, 360), (bx + 70, 360)], width=3)
     for wx in (bx - 56, bx + 56):
-        cv.shape(ell(wx, 430, 10, 10, n=14), fill='sumi', lw=2)
-    kid(cv, 400, KG, 80, facing='r', lean=20, eyes='dot', brows='up', mouth='smile',
-        arms={'L': dict(hand=(0.55, 0.15), bend=-0.2), 'R': dict(hand=(0.6, 0.25), bend=0.2)},
-        legs={'L': dict(foot=(-0.45, 1.0)), 'R': dict(foot=(0.2, 1.0))})
-    for yy in (330, 370):
-        cv.line([(350, yy), (325, yy)], width=3)
+        cv.shape(ell(wx, 430, 11, 11, n=14), fill='sumi', lw=2)
+    kid(cv, 410, 450, H, facing='r', lean=22, eyes='dot', brows='up', mouth='smile',
+        arms={'L': dict(hand=(0.6, 0.12), bend=-0.2), 'R': dict(hand=(0.66, 0.24), bend=0.2)},
+        legs={'L': dict(foot=(-0.5, 1.0)), 'R': dict(foot=(0.2, 1.0))})
+    for yy in (320, 362):
+        cv.line([(350, yy), (330, yy)], width=3)
     cv.save(path)
 
 
-def ch_s2_3_a(path):
+# ---- s2-3 メッセージのへんじをわすれた
+def phone_in(cv, side='R', dx=6, dy=-46, screen='ai2'):
+    def f(p):
+        h = p.hand(side)
+        phone(cv, h[0] + dx, h[1] + dy, 56, 94, rot=6, screen=screen)
+    return f
+
+
+TYPE_ARMS = {'L': dict(hand=(0.74, 0.3), bend=-0.2, handshape='point', pdir=(0.6, -0.8), front=True),
+             'R': dict(hand=(0.8, 0.44), bend=0.3)}
+
+
+def ch_s2_3_a(path):   # ごまかす: スマホを指さして言いわけ
     cv = cbase(241)
-    def ph(p):
-        h = p.hand('R')
-        phone(cv, h[0] + 10, h[1] - 44, 46, 78, rot=10, screen='gray')
-        # crack lines? -> no, it is a lie; screen just grey
-    kid(cv, 270, KG, KH, facing='r', eyes='dot', look=(-0.08, -0.02), brows='worry', mouth='talk',
-        arms={'L': dict(hand=(0.75, 0.0), bend=-0.3, handshape='point', pdir=(1, 0.2), front=True),
-              'R': dict(hand=(0.85, 0.35), bend=0.3)}, pf=ph, extras=('sweat2',))
+    kid(cv, 250, KG, KH, facing='r', eyes='dot', look=(-0.1, -0.02), brows='worry', mouth='talk',
+        arms={'L': dict(hand=(0.8, 0.0), bend=-0.3, handshape='point', pdir=(1, 0.2), front=True),
+              'R': dict(hand=(0.95, 0.35), bend=0.3)}, pf=phone_in(cv, screen='gray'), extras=('sweat2', 'speech'))
     cv.save(path)
 
 
-def ch_s2_3_b(path):
+def ch_s2_3_b(path):   # 正直に書く: 打つ＋吹き出し1つ
     cv = cbase(242)
-    def ph(p):
-        h = p.hand('R')
-        phone(cv, h[0] + 6, h[1] - 40, 50, 84, rot=6)
-    kid(cv, 230, KG, KH, facing='r', eyes='dot', look=(0.04, 0.06), mouth='line', brows=None,
-        arms={'L': dict(hand=(0.7, 0.3), bend=-0.2, handshape='point', pdir=(0.6, -0.8), front=True),
-              'R': dict(hand=(0.75, 0.42), bend=0.3)}, pf=ph)
-    bubble(cv, 470, 120, 110, 60, kind='round', tail=(-0.8, 0.6), content='dash')
+    kid(cv, 210, KG, KH, facing='r', eyes='dot', look=(0.04, 0.06), mouth='line', arms=TYPE_ARMS, pf=phone_in(cv))
+    bubble(cv, 470, 120, 112, 62, kind='round', tail=(-0.8, 0.6), content='dash')
     cv.save(path)
 
 
-def ch_s2_3_c(path):
+def ch_s2_3_c(path):   # そのまま: スマホを伏せて背を向ける
     cv = cbase(243)
-    # small table with face-down phone on the left; kid turned away (back) walking right
-    desk(cv, 70, 250, 330, CF + 60, depth=34)
-    phone(cv, 160, 306, 80, 30, face_down=True)
-    kid(cv, 430, KG, KH, facing='back',
-        arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.15, 0.75))})
+    desk(cv, 60, 250, 320, CF + 70, depth=34)
+    phone(cv, 155, 296, 84, 30, face_down=True)
+    kid(cv, 440, KG, KH, facing='back', arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.15, 0.75))})
     cv.save(path)
 
 
-def ch_s2_3_d(path):
+def ch_s2_3_d(path):   # あやまって、あそべる日をつたえる: 吹き出し2つ（ハート・丸）
     cv = cbase(244)
-    def ph(p):
-        h = p.hand('R')
-        phone(cv, h[0] + 6, h[1] - 40, 50, 84, rot=6)
-    kid(cv, 220, KG, KH, facing='r', eyes='dot', look=(0.04, 0.06), mouth='smile', brows=None,
-        arms={'L': dict(hand=(0.7, 0.3), bend=-0.2, handshape='point', pdir=(0.6, -0.8), front=True),
-              'R': dict(hand=(0.75, 0.42), bend=0.3)}, pf=ph)
-    bubble(cv, 470, 95, 96, 52, kind='round', tail=(-0.8, 0.6), content='heart')
-    bubble(cv, 500, 235, 110, 56, kind='round', tail=(-0.9, 0.4), content='dash')
+    kid(cv, 200, KG, KH, facing='r', eyes='dot', look=(0.04, 0.06), mouth='smile', arms=TYPE_ARMS, pf=phone_in(cv))
+    bubble(cv, 470, 92, 96, 54, kind='round', tail=(-0.8, 0.6), content='heart')
+    bubble(cv, 500, 236, 110, 58, kind='round', tail=(-0.9, 0.4), content='dash')
     cv.save(path)
 
 
-def ch_s3_1_a(path):
+# ---- s3-1 しあいでまけた
+def ch_s3_1_a(path):   # どうぐをなげて、どなる（人はたたかない）
     cv = cbase(251)
-    ball(cv, 470, 420, 34, 'soccer')
-    for k in range(3):   # bounce arcs
-        cv.line(ell(430 - k * 50, 400, 30, 30 - k * 6, 190, 350, n=8), width=3)
-    kid(cv, 260, KG, KH, facing='r', eyes='squeeze', brows='angry', mouth='shout', red=True,
-        arms={'L': dict(hand=(-0.3, 0.6), handshape='fist'), 'R': dict(hand=(0.7, 0.1), bend=0.3)},
+    ball(cv, 500, 430, 36, 'soccer')
+    for k in range(3):
+        cv.line(ell(450 - k * 52, 410, 30, 32 - k * 7, 190, 350, n=8), width=3)
+    kid(cv, 230, KG, KH, facing='r', eyes='squeeze', brows='angry', mouth='shout', red=True,
+        arms={'L': dict(hand=(-0.3, 0.6), handshape='fist'), 'R': dict(hand=(0.75, 0.1), bend=0.3)},
         extras=('anger',))
-    # shout lines
     for a in (-30, -10, 10, 30):
         ang = math.radians(a)
-        cv.line([(330 + 40 * math.cos(ang), 180 + 40 * math.sin(ang)),
-                 (330 + 80 * math.cos(ang), 180 + 80 * math.sin(ang))], width=4, color='red')
+        cv.line([(310 + 40 * math.cos(ang), 150 + 40 * math.sin(ang)),
+                 (310 + 84 * math.cos(ang), 150 + 84 * math.sin(ang))], width=4, color='red')
     cv.save(path)
 
 
-def ch_s3_1_b(path):
+def ch_s3_1_b(path):   # 「くやしい」とことばでいう: 胸に手を当てて話す
     cv = cbase(252)
-    kid(cv, 260, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
-        arms={'L': dict(hand=(0.42, 0.42), bend=-0.4, front=True), 'R': dict(hand=(0.1, 0.8))},
+    partner(cv, 'nakama', 510, H=AH * 0.9)
+    kid(cv, 240, KG, KH, facing='r', eyes='dot', brows='worry', mouth='talk',
+        arms={'L': dict(hand=(0.46, 0.4), bend=-0.4, front=True), 'R': dict(hand=(0.1, 0.8))},
         extras=('speech',))
-    person(cv, 'nakama', 520, 448, 80, facing='l', mouth='line', brows=None)
     cv.save(path)
 
 
-def ch_s3_1_c(path):
-    cv = cbase(253, wallc=mix('kinari', 'haiao', 0.18))
+def ch_s3_1_c(path):   # だまってひとりでかえる: グラウンドに背を向けて歩く
+    cv = cbase(253)
     for xx in range(-10, CW + 20, 40):
-        cv.line([(xx, 200), (xx, CF)], width=3, color='kinink', amp=0.3)
-    cv.line([(-10, 230), (CW + 10, 230)], width=4, color='kinink')
-    # goal post on the left (the field)
-    cv.line([(40, 140), (40, CF), ], width=7, color='kinari')
-    cv.line([(40, 140), (200, 140), (200, CF)], width=7, color='kinari')
-    cv.line([(40, 140), (40, CF)], width=3)
-    kid(cv, 430, KG, KH, facing='back',
+        cv.line([(xx, 210), (xx, CF)], width=3, color='kinink', amp=0.3)
+    cv.line([(-10, 236), (CW + 10, 236)], width=4, color='kinink')
+    cv.line([(30, 120), (30, CF)], width=7)
+    cv.line([(30, 120), (200, 120), (200, CF)], width=7)
+    for k in range(1, 4):
+        cv.line([(30 + k * 42, 124), (30 + k * 42, CF)], width=2, color='gray')
+    kid(cv, 440, KG, KH, facing='back',
         arms={'L': dict(hand=(-0.15, 0.75)), 'R': dict(hand=(0.15, 0.75))},
         legs={'L': (-0.25, 1.0), 'R': (0.2, 0.96)})
     cv.save(path)
 
 
-def ch_s3_1_d(path):
+def ch_s3_1_d(path):   # 3びょうまって、気持ちをしずめる: 目をとじて息をはく＋肩をたたくなかま
     cv = cbase(254)
-    kid(cv, 250, KG, KH, facing='r', eyes='closed', mouth='blow', brows=None,
+    kid(cv, 290, KG, KH, facing='r', eyes='closed', mouth='blow',
         arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.1, 0.8))}, extras=('breath',))
-    person(cv, 'nakama', 120, 452, 82, facing='r', eyes='dot', mouth='smile',
-           arms={'R': dict(hand=(1.05, -0.05), bend=0.4, front=True), 'L': dict(hand=(-0.1, 0.8))})
+    person(cv, 'nakama', 120, AG, AH * 0.9, facing='r', eyes='happy', mouth='smile',
+           arms={'R': dict(hand=(1.12, -0.05), bend=0.4, front=True), 'L': dict(hand=(-0.1, 0.8))})
     cv.save(path)
 
 
-def ch_s3_2_a(path):
+# ---- s3-2 からかわれた
+def ch_s3_2_a(path):   # 強い指で打つ＋とげとげ吹き出し
     cv = cbase(261)
-    def ph(p):
-        h = p.hand('R')
-        phone(cv, h[0] + 6, h[1] - 40, 50, 84, rot=6)
-    kid(cv, 220, KG, KH, facing='r', eyes='squeeze', brows='angry', mouth='tight', red=True,
-        arms={'L': dict(hand=(0.72, 0.2), bend=-0.2, handshape='point', pdir=(0.7, 0.7), front=True),
-              'R': dict(hand=(0.75, 0.42), bend=0.3)}, pf=ph, extras=('anger',))
-    # hard tap marks
+    kid(cv, 210, KG, KH, facing='r', eyes='squeeze', brows='angry', mouth='tight', red=True,
+        arms={'L': dict(hand=(0.76, 0.22), bend=-0.2, handshape='point', pdir=(0.7, 0.7), front=True),
+              'R': dict(hand=(0.8, 0.44), bend=0.3)}, pf=phone_in(cv), extras=('anger',))
     for a in (-60, -20, 20):
         ang = math.radians(a)
-        cv.line([(345 + 30 * math.cos(ang), 300 + 30 * math.sin(ang)),
-                 (345 + 52 * math.cos(ang), 300 + 52 * math.sin(ang))], width=3.5, color='red')
-    bubble(cv, 490, 130, 110, 82, kind='spiky', content='none', fill='akane2', lwm=0.9)
+        cv.line([(350 + 30 * math.cos(ang), 300 + 30 * math.sin(ang)),
+                 (350 + 54 * math.cos(ang), 300 + 54 * math.sin(ang))], width=3.5, color='red')
+    bubble(cv, 490, 120, 112, 84, kind='spiky', content='none', fill='akane2', lwm=0.9)
     for k in range(3):
-        cv.line([(458 + k * 30, 118), (470 + k * 30, 142)], width=5, color='kinari')
+        cv.line([(456 + k * 30, 108), (468 + k * 30, 132)], width=5, color='kinari')
     cv.save(path)
 
 
-def ch_s3_2_b(path):
+def ch_s3_2_b(path):   # まるい吹き出しをおくる
     cv = cbase(262)
-    def ph(p):
-        h = p.hand('R')
-        phone(cv, h[0] + 6, h[1] - 40, 50, 84, rot=6)
-    kid(cv, 220, KG, KH, facing='r', eyes='dot', mouth='line', look=(0.04, 0.06),
-        arms={'L': dict(hand=(0.7, 0.3), bend=-0.2, handshape='point', pdir=(0.6, -0.8), front=True),
-              'R': dict(hand=(0.75, 0.42), bend=0.3)}, pf=ph)
-    bubble(cv, 480, 140, 100, 64, kind='round', tail=(-0.8, 0.6), content='dots')
-    # sending trail
+    kid(cv, 210, KG, KH, facing='r', eyes='dot', mouth='line', look=(0.04, 0.06), arms=TYPE_ARMS, pf=phone_in(cv))
+    bubble(cv, 480, 126, 104, 66, kind='round', tail=(-0.8, 0.6), content='dots')
     for k in range(4):
-        cv.dot(370 + k * 18, 250 - k * 22, 4, color='kinink')
+        cv.dot(372 + k * 16, 250 - k * 20, 4, color='kinink')
     cv.save(path)
 
 
-def ch_s3_2_c(path):
+def ch_s3_2_c(path):   # ひざをかかえてすわる
     cv = cbase(263)
-    kid(cv, 320, KG + 2, KH, facing='front', eyes='down', brows='worry', mouth='frown', sit=True, look=(0, 0.05),
-        legs={'L': dict(foot=(-0.15, 0.95), knee=(-0.2, 0.0)), 'R': dict(foot=(0.15, 0.95), knee=(0.2, 0.0))},
-        arms={'L': dict(hand=(0.3, 0.6), bend=-0.6), 'R': dict(hand=(-0.3, 0.6), bend=0.6)})
-    cv.shadow(320, 445, 90, 12, alpha=0.2)
-    phone(cv, 470, 430, 40, 66, rot=80, face_down=False)
+    gx, gy, H = 300, 450, KH
+
+    def knees(p):
+        # shins + knees in front of the body, arms wrapped around
+        o = p.o
+        cv.shape(ell(gx, gy - 0.16 * H, 0.52 * H, 0.2 * H, n=40), fill=o['pants'])
+        for s in (-1, 1):
+            kx = gx + s * 0.2 * H
+            cv.tube([(kx, gy - 1.05 * H), (kx + s * 0.1 * H, gy - 0.08 * H)], 0.28 * H, o['pants'])
+            cv.shape(ell(kx + s * 0.14 * H, gy - 0.02 * H, 0.2 * H, 0.1 * H, n=24), fill='sumi', lw=cv.lw * 0.8)
+        cv.tube([(gx - 0.42 * H, gy - 1.35 * H), (gx - 0.36 * H, gy - 0.8 * H), (gx, gy - 0.72 * H)], 0.2 * H, o['top'])
+        cv.tube([(gx + 0.42 * H, gy - 1.35 * H), (gx + 0.36 * H, gy - 0.8 * H), (gx, gy - 0.72 * H)], 0.2 * H, o['top'])
+        cv.shape(ell(gx - 0.05 * H, gy - 0.72 * H, 0.1 * H, 0.1 * H, n=16), fill='skin', lw=cv.lw * 0.8)
+        cv.shape(ell(gx + 0.07 * H, gy - 0.74 * H, 0.1 * H, 0.1 * H, n=16), fill='skin', lw=cv.lw * 0.8)
+    cv.shadow(gx, gy + 4, 110, 14, alpha=0.22)
+    kid(cv, gx, gy + 0.55 * H, H, facing='front', eyes='down', brows='worry', mouth='frown', sit=True,
+        look=(0, 0.06), head_drop=0.08,
+        legs={'L': (-0.2, 0.05), 'R': (0.2, 0.05)},
+        arms={'L': dict(hand=(0.05, 0.4), handshape='none', behind=True),
+              'R': dict(hand=(-0.05, 0.4), handshape='none', behind=True)}, pf=knees)
+    phone(cv, 480, 440, 42, 70, rot=80)
     cv.save(path)
 
 
-def ch_s3_2_d(path):
+def ch_s3_2_d(path):   # スマホを伏せて、大人に話す
     cv = cbase(264)
-    desk(cv, 40, 230, 330, CF + 60, depth=34)
-    phone(cv, 140, 306, 80, 30, face_down=True)
-    person(cv, 'otona', 540, 448, 84, facing='l', eyes='dot', mouth='smile',
-           arms={'L': dict(hand=(-0.2, 0.7)), 'R': dict(hand=(0.1, 0.8))})
+    desk(cv, 30, 200, 330, CF + 70, depth=34)
+    phone(cv, 115, 306, 84, 30, face_down=True)
+    partner(cv, 'otona', 540, 'nikko')
     kid(cv, 330, KG, KH * 0.95, facing='r', eyes='dot', brows='worry', mouth='talk',
         arms={'L': dict(hand=(-0.1, 0.8)), 'R': dict(hand=(0.4, 0.35), bend=0.4)}, extras=('speech',))
     cv.save(path)

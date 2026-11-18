@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>せんたくの めいきゅう</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* game.js 用の小さな追加（色・形は style.css の変数だけを使う） */
+  html.is-title .cm-topbar { background: transparent; }
+  html.is-title .cm-topbar::after { display: none; }
+  html.is-title .cm-progress { visibility: hidden; }
+  .cm-bottombar__side { display: flex; align-items: center; gap: var(--cm-gap); }
+  .cm-bottombar.has-wide-right .cm-guide__bubble { max-width: 620px; }
+  .cm-guide[hidden], .cm-btn[hidden] { display: none; }
+  .cm-screen.is-demo .cm-choice, .cm-screen.is-demo .cm-other__btns .cm-btn { pointer-events: none; }
+  img.is-missing { visibility: hidden; }
+  .cm-ctrl.is-off .ic-wave, .cm-ctrl:not(.is-off) .ic-mute { display: none; }
+  .cm-ctrl.is-low { background: var(--cm-kinari-2); }
+  .cm-ctrl.is-low .ic-wave2 { display: none; }
+  .cm-flip { animation: cm-flip .4s ease-out; transform-origin: 50% 50%; }
+  @keyframes cm-flip { from { transform: perspective(1600px) rotateY(80deg); opacity: .2; } to { transform: none; opacity: 1; } }
+  .cm-lamp { transition: transform .3s var(--cm-ease); }
+  .cm-lamp.is-pop { transform: scale(1.25); }
+  .cm-choice__lamps.is-hinted { outline: 4px dashed var(--cm-kin-ink); outline-offset: 6px; border-radius: 4px; }
+  /* 場面の文の紙 */
+  .cm-scene__text.cm-paper { padding: 48px 48px 56px; }
+  .cm-scene__feel { display: inline-block; margin: 24px 0 0 16px; padding: 4px 20px; border-radius: 4px; background: var(--cm-akane); color: var(--cm-kinari); font-size: var(--cm-fs-label); }
+  .cm-breath__ask.cm-paper { line-height: 1.5; }
+  .cm-breath__col { display: flex; flex-direction: column; gap: 40px; align-items: center; }
+  /* 未来の画面は高さがきついので、すこしつめる */
+  .cm-timeline { margin-bottom: 36px; height: 120px; }
+  .cm-future { min-height: 0; padding: 40px 64px 36px; }
+  .cm-future__body { gap: 18px; }
+  /* まとめの問い: カードの絵を横長にして、ランプの場所をあける */
+  .is-sum .cm-choice { min-height: 0; padding-top: 52px; gap: 12px; }
+  .is-sum .cm-choice__art { aspect-ratio: 16 / 10; }
+  .is-sum .cm-prompt { margin-bottom: 28px; }
+  /* ヒント・くらべる */
+  .cm-sheet { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .cm-sheet__head { margin: 0; color: var(--cm-kinari); font-family: var(--cm-font-hand); font-weight: 600; font-size: 52px; line-height: 1.3; }
+  /* ふり返り 1ページ目: 絵を左、文を右にして 4列×2段に入れる */
+  .cm-review__row { display: grid; grid-template-columns: 168px 1fr; gap: 16px; align-items: center; }
+  .cm-review__row img { width: 168px; margin: 0; }
+  .cm-review__seen { display: flex; gap: 4px; margin-top: 4px; }
+  .cm-review__seen .cm-choice__mark { position: static; width: 44px; height: 44px; font-size: 20px; }
+  .cm-review__name { display: block; font-weight: 700; font-size: var(--cm-fs-label); }
+  .cm-review__sub { margin: 0 0 24px; color: var(--cm-kinari); font-size: var(--cm-fs-body); font-weight: 700; }
+  .cm-tip { position: relative; }
+  /* ステップ3 おてほん: きもちに名前をつける */
+  .cm-name { display: flex; align-items: center; justify-content: center; gap: 64px; height: 100%; }
+  .cm-name img { width: 360px; height: 360px; border-radius: 50%; border: 4px solid var(--cm-sumi); background: var(--cm-kinari-2); }
+  .cm-name__word { font-family: var(--cm-font-hand); font-weight: 600; font-size: 88px; line-height: 1.3; margin: 0; }
+  .cm-name__ask { margin: 0 0 16px; font-size: var(--cm-fs-q); font-weight: 700; }
+  .cm-clear__stamp.is-wait, .cm-clear .cm-paper.is-wait { visibility: hidden; }
+  .cm-map__node { background: none; border: 0; padding: 0; }
+  .cm-map__node[disabled] { cursor: default; }
+  .cm-map__node .cm-paper { width: 100%; padding: 24px 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .cm-map__node img { width: 100%; aspect-ratio: 4 / 3; border: 3px solid var(--cm-sumi); background: var(--cm-kinari-2); }
+  .cm-map__name { font-family: var(--cm-font-hand); font-weight: 600; font-size: 44px; line-height: 1.2; }
+  .cm-map__sub { font-size: var(--cm-fs-label); }
+  .cm-map__lampwrap { background: var(--cm-kinari); border: 3px solid var(--cm-sumi); border-radius: 4px; padding: 4px 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="cm-stage" id="stage">
+  <div id="stage3d" class="cm-layer3d" aria-hidden="true"></div>
+
+  <section class="cm-screen is-active" id="screen" aria-live="polite"></section>
+
+  <header class="cm-topbar">
+    <div class="cm-progress" id="progress" aria-label="いまの ばしょ">
+      <span class="cm-progress__label" id="progLabel"></span>
+      <ol class="cm-dots" id="dots">
+        <li class="cm-dot">えらぶ</li>
+        <li class="cm-dot">みらい</li>
+        <li class="cm-dot">まとめ</li>
+      </ol>
+    </div>
+    <div class="cm-controls">
+      <button type="button" class="cm-ctrl" id="ctrlSound" aria-pressed="true">
+        <svg class="cm-ctrl__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 19h8l11-9v28l-11-9H8z" fill="#2A211C" stroke="#2A211C" stroke-width="3" stroke-linejoin="round"/><path class="ic-wave" d="M32 17c3 2 4.5 4.5 4.5 7s-1.5 5-4.5 7M36.5 12c5 3.5 7.5 7.5 7.5 12s-2.5 8.5-7.5 12" fill="none" stroke="#2A211C" stroke-width="3.5" stroke-linecap="round"/><path class="ic-mute" d="M33 18l11 12M44 18L33 30" fill="none" stroke="#2A211C" stroke-width="3.5" stroke-linecap="round"/></svg>
+        <span>おと</span><span class="cm-ctrl__state">あり</span>
+      </button>
+      <button type="button" class="cm-ctrl" id="ctrlMotion" aria-pressed="false">
+        <svg class="cm-ctrl__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 18c5-6 9-6 14 0s9 6 14 0 9-6 10-2" fill="none" stroke="#2A211C" stroke-width="3.5" stroke-linecap="round"/><path class="ic-wave2" d="M5 32c5-6 9-6 14 0s9 6 14 0 9-6 10-2" fill="none" stroke="#2A211C" stroke-width="3.5" stroke-linecap="round"/></svg>
+        <span>うごき</span><span class="cm-ctrl__state">ふつう</span>
+      </button>
+      <button type="button" class="cm-ctrl" id="ctrlBack">
+        <svg class="cm-ctrl__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M18 10L7 20l11 10" fill="none" stroke="#2A211C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 20h20c7 0 12 5 12 11s-5 11-12 11h-8" fill="none" stroke="#2A211C" stroke-width="4" stroke-linecap="round"/></svg>
+        <span>もどる</span><span class="cm-ctrl__state" id="ctrlBackState">ちず</span>
+      </button>
+    </div>
+  </header>
+
+  <footer class="cm-bottombar" id="bottombar">
+    <div class="cm-bottombar__side">
+      <button type="button" class="cm-btn cm-btn--read" id="btnRead">
+        <svg class="cm-btn__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 19h8l11-9v28l-11-9H7z" fill="#2A211C" stroke="#2A211C" stroke-width="3" stroke-linejoin="round"/><path d="M31 17c3 2 4.5 4.5 4.5 7s-1.5 5-4.5 7M35.5 12c5 3.5 7.5 7.5 7.5 12s-2.5 8.5-7.5 12" fill="none" stroke="#2A211C" stroke-width="3.5" stroke-linecap="round"/></svg>
+        <span>よむ</span>
+      </button>
+    </div>
+    <div class="cm-guide" id="guide" hidden>
+      <div class="cm-guide__orb" aria-hidden="true"></div>
+      <p class="cm-guide__bubble"><span class="cm-guide__name">ひかりさん</span><span id="guideText"></span></p>
+    </div>
+    <div class="cm-bottombar__side">
+      <button type="button" class="cm-btn cm-btn--sub" id="btnSub" hidden></button>
+      <button type="button" class="cm-btn cm-btn--primary" id="btnNext" hidden>つぎへ</button>
+    </div>
+  </footer>
+
+  <div class="cm-pointer" id="pointer" hidden aria-hidden="true"></div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="motion3d.js"></script>
+<script src="bgm.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

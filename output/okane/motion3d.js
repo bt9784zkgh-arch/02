@@ -599,7 +599,7 @@
     var MASCOT_POS = {
       title:  { x: 620,  y: 890, size: 1.25 },
       // 問題中・ふり返りは HUD の「右上のすきま」（進みぐあいの ことばと 設定ボタンの あいだ）に 小さく
-      play:   { x: 1350, y: 142, size: 0.8 },
+      play:   { x: 480,  y: 525, size: 0.8 },   // おみせの ひとの右・たなの上の 空き
       result: { x: 1350, y: 142, size: 0.8 }
     };
     if (options.mascot === false) mascot.visible = false;

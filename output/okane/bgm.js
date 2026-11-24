@@ -109,7 +109,7 @@
 
       // オルゴール用の小さなこだま（なつかしい感じ）
       echoIn = ctx.createGain(); echoIn.gain.value = 0.22;
-      var dl = ctx.createDelay(1.0); dl.delayTime.value = EIGHTH * 3;
+      var dl = ctx.createDelay(2.0); dl.delayTime.value = EIGHTH * 3;
       var fb = ctx.createGain(); fb.gain.value = 0.28;
       var dlf = ctx.createBiquadFilter(); dlf.type = 'lowpass'; dlf.frequency.value = 2400;
       echoIn.connect(dl); dl.connect(dlf); dlf.connect(fb); fb.connect(dl);

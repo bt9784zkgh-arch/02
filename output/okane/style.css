@@ -1,0 +1,1030 @@
+/* =====================================================================
+   おみせで おかいもの  style.css
+   テーマ: 「だがしや まるや」— 昭和の駄菓子屋と商店街
+   砂かべ・木のたな・手書きのはり紙・ねふだ・マスキングテープ
+   基準 1920×1080 の .stage を、画面に合わせて拡大縮小する（JSで --stage-scale を入れる）
+   ===================================================================== */
+
+@import url("fonts/fonts.css");
+
+/* ------------------------------------------------------------------ 1. 色・文字・大きさ */
+:root {
+  /* 背景（店のかべ・紙） */
+  --kabe: #E6D5B3;        /* 砂かべ（基本の背景） */
+  --kabe-dark: #D6C095;   /* かべの影・地面 */
+  --kami: #FBF5E6;        /* はり紙・ねふだの紙 */
+  --sumi: #2E2219;        /* 墨（文字・線） */
+
+  /* テーマの4色 */
+  --ki: #8B5A33;          /* 木（たな・カウンター） */
+  --ki-dark: #5E3A1E;     /* こい木（わく・ふち） */
+  --ki-light: #B07A4A;    /* うすい木（木目） */
+  --enji: #A3352B;        /* えんじ（看板・はなまる） */
+  --ai: #2C4A6E;          /* 藍（のれん・押せるもの・フォーカス） */
+  --yamabuki: #E3B23C;    /* 山吹（いまの位置・ほめる） */
+
+  /* 硬貨の色（assets/coin-*.svg と同じ） */
+  --coin-1: #E9ECEA;      /* しろっぽい ぎんいろ */
+  --coin-5: #D6A83E;      /* きんいろ */
+  --coin-10: #9A5530;     /* ちゃいろ */
+  --coin-50: #C4C9CC;     /* ぎんいろ */
+  --coin-100: #B4BAC0;    /* ぎんいろ（すこし こい） */
+  --coin-10-ink: #7C4122; /* 10えん色の文字・わく（紙の上で 5.5:1） */
+  --coin-1-ink: #59626A;  /* 1えん色の文字・わく（紙の上で 5.7:1） */
+
+  /* 文字 */
+  --font-body: "Zen Maru Gothic", "BIZ UDPGothic", "BIZ UDPゴシック", "Hiragino Maru Gothic ProN", "ヒラギノ丸ゴ ProN", "Meiryo", "メイリオ", sans-serif;
+  --font-hand: "Yusei Magic", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+
+  --fs-small: 28px;       /* 最小（ボタンのことば・ラベル） */
+  --fs-body: 32px;        /* 本文・ことば */
+  --fs-question: 52px;    /* 問題文 */
+  --fs-sign: 56px;        /* 看板（HUD） */
+  --fs-title: 132px;      /* タイトル看板 */
+  --fs-price: 150px;      /* ねふだの数字 */
+  --lh: 1.7;
+
+  /* 大きさ（基準 1920×1080 の px） */
+  --tap-min: 180px;       /* 押せるもの の最小（1280×720 に縮めても 120px） */
+  --tap-gap: 40px;        /* となりとの間（縮めても 26px） */
+  --coin-choice: 240px;   /* ステップ1 の硬貨の絵 */
+  --coin-tray: 132px;     /* トレーの硬貨ボタン */
+  --focus-ring: 0 0 0 6px var(--kami), 0 0 0 12px var(--ai);
+
+  /* 動き */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --t-press: 90ms;
+  --t-soft: 600ms;
+
+  /* 紙の質感（静止したノイズ） */
+  --paper-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .18  0 0 0 0 .13  0 0 0 0 .09  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --wood-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='120'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='.004 .18' numOctaves='3' seed='9'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+}
+
+/* ------------------------------------------------------------------ 2. 土台 */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ki-dark);          /* 16:9 からはみ出たところ = 店のおく */
+  color: var(--sumi);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--fs-body);
+  line-height: var(--lh);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+
+ruby rt {
+  font-size: .5em;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* 1920×1080 の舞台。JS で --stage-scale = min(innerWidth/1920, innerHeight/1080) を入れる */
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: 50% 50%;
+  overflow: hidden;
+  background-color: var(--kabe);
+  background-image: var(--paper-noise);
+}
+
+/* 3D キャンバス（Motion3D がここに重ねる。押せるものの じゃまをしない） */
+.stage3d {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ------------------------------------------------------------------ 3. 画面のわく（全ステップ共通の配置） */
+/*
+  列: 40 | 520 左（おみせのひと・ねふだ）| 40 | 1280 右（はり紙・あそぶところ）| 40
+  行: 150 HUD | 20 | 180 はり紙 | 20 | 480 あそぶところ | 20 | 210 カウンター
+*/
+.screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 40px 520px 40px 1280px 40px;
+  grid-template-rows: 150px 20px 180px 20px 480px 20px 210px;
+}
+.screen[hidden] { display: none; }
+
+.hud        { grid-column: 2 / 5; grid-row: 1; }
+.shopside   { grid-column: 2;     grid-row: 3 / 6; }
+.harigami   { grid-column: 4;     grid-row: 3; }
+.playarea   { grid-column: 4;     grid-row: 5; }
+.counter    { grid-column: 1 / -1; grid-row: 7; }
+
+/* ------------------------------------------------------------------ 4. HUD（看板・進みぐあい・せってい） */
+.hud {
+  display: grid;
+  grid-template-columns: minmax(520px, 800px) 1fr auto;
+  align-items: center;
+  column-gap: 32px;
+  padding-top: 14px;
+}
+
+/* 手描きの木の看板 */
+.kanban {
+  position: relative;
+  justify-self: start;
+  max-width: 800px;
+  height: 112px;
+  padding: 0 36px 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--enji);
+  color: var(--kami);
+  border: 6px solid var(--ki-dark);
+  border-radius: 6px 10px 4px 12px;
+  box-shadow: 0 8px 0 var(--ki-dark);
+  transform: rotate(-1.2deg);
+}
+.kanban::before, .kanban::after {      /* くぎ */
+  content: "";
+  position: absolute;
+  top: 12px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--kabe-dark);
+  border: 3px solid var(--ki-dark);
+}
+.kanban::before { left: 10px; }
+.kanban::after { right: 10px; }
+.kanban__step {                        /* ステップの 数字だけ（手でぬった まる） */
+  flex: none;
+  width: 76px; height: 76px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-hand);
+  font-size: 52px;
+  line-height: 1;
+  background: var(--kami);
+  color: var(--enji);
+  border-radius: 50% 46% 52% 48%;
+}
+.kanban__name {
+  font-family: var(--font-hand);
+  font-size: var(--fs-sign);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.kanban__name--long { font-size: 46px; }  /* ステップ3「10えんと 1えんで かおう」 */
+
+/* 進みぐあい: ○ を5つ＋ことば。形でも区別する（おわった=中に ✓ のある塗り、いま=太いわく、まだ=点線） */
+.progress {                            /* ○の列の下に ことば（2だん） */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.progress__dots {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dot {
+  position: relative;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 5px dashed var(--ki-dark);
+  background: transparent;
+}
+.dot.is-now {
+  border: 8px solid var(--ai);
+  background: var(--kami);
+}
+.dot.is-done {
+  border: 5px solid var(--sumi);
+  background: var(--yamabuki);
+}
+.dot.is-done::after {                  /* ✓ を線で描く */
+  content: "";
+  position: absolute;
+  left: 12px; top: 6px;
+  width: 12px; height: 22px;
+  border-right: 6px solid var(--sumi);
+  border-bottom: 6px solid var(--sumi);
+  transform: rotate(40deg);
+}
+.progress__text {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.progress__text strong { font-size: 36px; font-weight: 700; }
+
+/* せってい（おと・うごき・もどる）右上に固定 */
+.settings {
+  display: flex;
+  gap: 24px;
+}
+.btn-setting {
+  width: 128px;
+  height: 124px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  background: var(--kami);
+  color: var(--ai);
+  border: 4px solid var(--ai);
+  border-bottom-width: 10px;
+  border-radius: 14px 14px 18px 18px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.btn-setting img, .btn-setting svg { width: 52px; height: 52px; }
+.btn-setting[aria-pressed="false"] {   /* おと なし／うごき すくなめ の時: 斜めの紙をはる */
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 14px, rgba(44, 74, 110, .12) 14px 20px),
+    var(--kami);
+}
+
+/* ------------------------------------------------------------------ 5. 左: おみせのひと・たな・ねふだ */
+.shopside {
+  position: relative;
+  display: grid;
+  grid-template-rows: 360px 1fr;
+  row-gap: 0;
+}
+.shopkeeper {
+  position: relative;
+  align-self: end;
+  justify-self: center;
+  width: 300px;
+  height: 360px;
+}
+.shopkeeper img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; }
+
+/* 左下: 木のたな（ねふだと だがしを おく）*/
+.shelf {
+  position: relative;
+  background-color: var(--ki);
+  background-image: var(--wood-grain);
+  border: 6px solid var(--ki-dark);
+  border-radius: 4px;
+  box-shadow: inset 0 -18px 0 var(--ki-dark);
+  padding: 20px 20px 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 20px;
+}
+.shelf__item { width: 150px; height: 150px; align-self: center; flex: none; }
+.shelf__item img { width: 100%; height: 100%; }
+.shelf--quiet .shelf__item { opacity: .75; }   /* ステップ1: かざり（うごかない） */
+
+/* ねふだ（手書き） */
+.nefuda {
+  position: relative;
+  flex: none;
+  width: 300px;
+  min-height: 236px;
+  padding: 30px 14px 12px;
+  background: var(--kami);
+  background-image: var(--paper-noise);
+  border: 4px solid var(--sumi);
+  border-radius: 3px 8px 4px 6px;
+  box-shadow: 4px 6px 0 rgba(46, 34, 25, .22);
+  text-align: center;
+  transform: rotate(2deg);
+}
+.nefuda::before {                      /* ひもの あな */
+  content: "";
+  position: absolute;
+  top: 10px; left: 50%;
+  width: 18px; height: 18px;
+  margin-left: -9px;
+  border-radius: 50%;
+  border: 4px solid var(--sumi);
+  background: var(--kabe);
+}
+.nefuda__name {
+  display: block;
+  font-size: var(--fs-small);
+  line-height: 1.3;
+}
+.nefuda__price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  font-family: var(--font-hand);
+  font-size: var(--fs-price);
+  line-height: 1;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+}
+.nefuda__yen {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 48px;
+  margin-left: 4px;
+}
+/* ステップ3: 十のくらい＝ちゃいろ＋下に10えん、一のくらい＝はいいろ＋下に1えん（色だけにしない） */
+.nefuda__ju, .nefuda__ichi {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 56px;
+}
+.nefuda__ju { color: var(--coin-10-ink); }
+.nefuda__ichi { color: var(--coin-1-ink); }
+.nefuda__ju::after, .nefuda__ichi::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 6px;
+  width: 44px; height: 44px;
+  margin-left: -22px;
+  background: center / contain no-repeat;
+}
+.nefuda__ju::after { background-image: url("assets/coin-10.svg"); }
+.nefuda__ichi::after { background-image: url("assets/coin-1.svg"); }
+/* ヒント: 数字を大きく（ステップ2 問3・4 の「4」「7」） */
+.nefuda__big {
+  display: inline-block;
+  font-size: 1.25em;
+  color: var(--enji);
+  border-bottom: 8px solid var(--yamabuki);
+}
+/* ねふだの下の うすい見本の まる（ステップ2 問1・2） */
+.nefuda__guide {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.nefuda__guide span {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--coin-10-ink);
+  background: rgba(154, 85, 48, .25);
+}
+
+/* ------------------------------------------------------------------ 6. はり紙（問題文） */
+.harigami {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 20px 28px 20px 44px;
+  background: var(--kami);
+  background-image: var(--paper-noise);
+  border: 3px solid rgba(46, 34, 25, .35);
+  border-radius: 2px;
+  box-shadow: 3px 5px 0 rgba(46, 34, 25, .18);
+  transform: rotate(-.4deg);
+}
+/* マスキングテープ（左上・右上） */
+.harigami::before, .harigami::after {
+  content: "";
+  position: absolute;
+  top: -18px;
+  width: 150px; height: 40px;
+  background: rgba(227, 178, 60, .75);
+  clip-path: polygon(3% 0, 97% 4%, 100% 22%, 97% 45%, 100% 70%, 96% 100%, 2% 96%, 0 74%, 3% 50%, 0 25%);
+}
+.harigami::before { left: 40px; transform: rotate(-5deg); }
+.harigami::after { right: 180px; transform: rotate(4deg); background: rgba(44, 74, 110, .45); }
+
+.question {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-question);
+  font-weight: 700;
+  line-height: 1.6;
+  word-break: keep-all;                /* ことばの とちゅうで 折りかえさない（スペースで 折る） */
+}
+.question--long { font-size: 44px; line-height: 1.5; }   /* ふり返りの 見出し など 2行になる文 */
+/* 問いの横の「ヒントの まる」（ステップ1） */
+.question__coinhint {
+  flex: none;
+  width: 110px; height: 110px;
+}
+
+/* よみあげボタン（すべての文に） */
+.btn-yomu {
+  flex: none;
+  width: var(--tap-min);
+  height: 136px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px;
+  background: var(--ai);
+  color: var(--kami);
+  border: 4px solid var(--sumi);
+  border-bottom-width: 12px;
+  border-radius: 16px 12px 16px 12px;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-yomu img, .btn-yomu svg { width: 52px; height: 52px; }
+.btn-yomu--small {                     /* ことば欄の中の小さめ（それでも 132px） */
+  width: 132px; height: 132px;
+  flex-direction: column; gap: 2px;
+  font-size: var(--fs-small);
+}
+
+/* 「おてほん」の はり札 */
+.tag-otehon {
+  position: absolute;
+  left: -20px; top: -26px;
+  padding: 4px 22px 6px;
+  background: var(--enji);
+  color: var(--kami);
+  font-family: var(--font-hand);
+  font-size: 40px;
+  line-height: 1.2;
+  border: 4px solid var(--sumi);
+  transform: rotate(-6deg);
+  z-index: 2;
+}
+
+/* せいかいの はなまる スタンプ（はり紙の右はしに おす） */
+.stamp-hanamaru {
+  position: absolute;
+  right: 220px; top: 50%;
+  width: 200px; height: 200px;
+  margin-top: -100px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ------------------------------------------------------------------ 7. あそぶところ */
+.playarea {
+  position: relative;
+}
+/* たな板（下にしく） */
+.playarea::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 90px;
+  background: url("assets/tana.svg") center / 100% 100% no-repeat;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* --- ステップ1: 硬貨のえらぶボタン（2〜3まい） */
+.choices {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 72px;
+  padding-bottom: 56px;
+}
+.coin-choice {
+  position: relative;
+  width: 300px;
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  background: var(--kami);
+  border: 5px solid var(--ki-dark);
+  border-bottom-width: 16px;
+  border-radius: 20px 20px 10px 10px;  /* 木の札。上だけ丸い */
+  cursor: pointer;
+  transition: transform var(--t-press) ease-out, border-bottom-width var(--t-press) ease-out;
+}
+.coin-choice img { width: var(--coin-choice); height: var(--coin-choice); }
+.coin-choice__label {                  /* 「10えん」— 声とおなじ ことば */
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* --- ステップ2・3: 硬貨の山（上=10えん、下=1えん。位置は固定） */
+.piles {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 1;
+  width: 440px;
+  height: 400px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 24px;
+}
+.coin-pile {
+  position: relative;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 16px;
+  background: var(--kami);
+  border: 5px solid var(--ki-dark);
+  border-bottom-width: 14px;
+  border-radius: 16px 16px 8px 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--t-press) ease-out, border-bottom-width var(--t-press) ease-out;
+}
+.coin-pile[hidden] { display: grid; visibility: hidden; }   /* ステップ2 では下の山の場所だけ のこす */
+.coin-pile__stack { position: relative; width: 160px; height: 150px; }
+.coin-pile__stack img {                /* 3まい かさねて「山」に見せる */
+  position: absolute;
+  width: 120px; height: 120px;
+}
+.coin-pile__stack img:nth-child(1) { left: 0;    top: 26px; }
+.coin-pile__stack img:nth-child(2) { left: 18px; top: 15px; }
+.coin-pile__stack img:nth-child(3) { left: 36px; top: 4px; }
+.coin-pile__label {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.coin-pile__label small { display: block; font-size: var(--fs-small); font-weight: 500; white-space: nowrap; }
+
+/* --- トレー（おかねを のせる おさら） */
+.tray {
+  position: absolute;
+  right: 0; top: 0;
+  z-index: 1;
+  width: 800px;
+  height: 400px;
+  display: grid;
+  grid-template-rows: 72px 1fr;
+  padding: 10px 24px 20px;
+  background: #6E8F7A;                 /* 古い 緑の トレー（ゴムのおさら） */
+  border: 6px solid var(--sumi);
+  border-radius: 44px 44px 40px 40px / 30px 30px 28px 28px;
+  box-shadow: inset 0 0 0 10px rgba(251, 245, 230, .25);
+}
+.tray__total {                         /* 「いま 30えん」 */
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--kami);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+}
+.tray__total-num {
+  min-width: 2.2ch;
+  padding: 6px 16px 4px;
+  background: var(--kami);
+  color: var(--sumi);
+  border-radius: 8px;
+  font-family: var(--font-hand);
+  font-size: 60px;
+  text-align: right;
+}
+.tray__rooms {
+  display: grid;
+  grid-template-rows: 1fr;             /* ステップ2: 1へや */
+  row-gap: 16px;
+  min-height: 0;
+}
+.tray--two .tray__rooms { grid-template-rows: 1fr 1fr; }   /* ステップ3: 2へや */
+.tray__room {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 16px 20px;
+  padding: 10px 14px 10px 14px;
+  background: rgba(251, 245, 230, .16);
+  border: 3px dashed rgba(251, 245, 230, .7);
+  border-radius: 14px;
+  min-height: 0;
+}
+.tray__room-name {                     /* 「10えんの おへや」 */
+  position: absolute;
+  right: 14px; top: -2px;
+  padding: 0 10px;
+  color: var(--kami);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.4;
+  background: #6E8F7A;
+  transform: translateY(-50%);
+}
+.tray--two .tray__room { padding-top: 14px; }
+.tray__room.is-crowded { gap: 16px 0; }                 /* 6まい以上: すこし かさねる */
+.tray__room.is-crowded .tray-coin + .tray-coin { margin-left: -40px; }
+
+/* トレーの硬貨（押すと 山にもどる） */
+.tray-coin {
+  width: var(--coin-tray);
+  height: var(--coin-tray);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.tray-coin img { width: 100%; height: 100%; }
+/* ステップ2: 1へやで 2だん（5まい×2） → 132px を少し小さく 120px に */
+.tray:not(.tray--two) .tray-coin { width: 120px; height: 120px; }
+
+/* 点線の まる（ヒント: ここに のせよう） */
+.coin-slot {
+  width: var(--coin-tray);
+  height: var(--coin-tray);
+  border-radius: 50%;
+  border: 6px dashed var(--kami);
+  background: rgba(251, 245, 230, .12);
+}
+.tray:not(.tray--two) .coin-slot { width: 120px; height: 120px; }
+.coin-slot--10 { border-color: #E9B890; }   /* ちゃいろ がかった点線 */
+.coin-slot--1  { border-color: var(--kami); border-style: dotted; }  /* ぎんいろ: 丸い点 */
+.coin-slot.is-filled { visibility: hidden; }
+
+/* 「ここまで 50」の しきり（ステップ2 問4 のヒント） */
+.tray-mark {
+  align-self: center;
+  padding: 4px 12px;
+  background: var(--yamabuki);
+  color: var(--sumi);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.3;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+}
+
+/* ------------------------------------------------------------------ 8. カウンター（ことば・大きいボタン） */
+.counter {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px auto 40px;
+  align-items: center;
+  background-color: var(--ki);
+  background-image: var(--wood-grain);
+  border-top: 10px solid var(--ki-dark);
+  box-shadow: inset 0 14px 0 rgba(255, 255, 255, .08);
+}
+.counter > :first-child { grid-column: 2; }
+.counter > .counter__buttons { grid-column: 4; }
+
+/* おみせのひとの ことば（ほめる・ヒント・もういちど） */
+.message {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 150px;
+  padding: 10px 24px 10px 28px;
+  background: var(--kami);
+  border: 4px solid var(--sumi);
+  border-radius: 10px 30px 30px 30px;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.message::before {                     /* ふきだしの しっぽ（左上のおみせのひとへ） */
+  content: "";
+  position: absolute;
+  left: 140px; top: -34px;
+  width: 44px; height: 34px;
+  background: var(--kami);
+  border-left: 4px solid var(--sumi);
+  border-top: 4px solid var(--sumi);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  transform: skewX(18deg);
+}
+.message__text { flex: 1; margin: 0; word-break: keep-all; }
+.message__mark { flex: none; width: 104px; height: 104px; }
+.message:empty, .message.is-empty { visibility: hidden; }
+/* ほめる時: はなまる＋山吹の下線 */
+.message--good { border-color: var(--enji); border-width: 6px; }
+.message--good .message__text { font-weight: 700; }
+.message--good .message__text em { font-style: normal; background: linear-gradient(transparent 62%, rgba(227, 178, 60, .55) 62%); }
+/* もういちど・ヒントの時: むしめがね＋藍の点線わく（赤や × は使わない） */
+.message--retry { border-color: var(--ai); border-style: dashed; border-width: 6px; }
+.message--hint  { border-color: var(--ai); border-width: 6px; }
+
+.counter__buttons {
+  display: flex;
+  gap: 40px;
+}
+
+/* 大きい木札ボタン（はじめる・やってみる・これで おねがいします・つぎへ・もういちど あそぶ） */
+.btn-main {
+  min-width: 420px;
+  height: 172px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--ai);
+  color: var(--kami);
+  border: 5px solid var(--sumi);
+  border-bottom-width: 16px;
+  border-radius: 8px 8px 22px 22px;    /* のれんの すそ のように下を丸く */
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--t-press) ease-out, border-bottom-width var(--t-press) ease-out;
+}
+.btn-main[hidden] { display: flex; visibility: hidden; }    /* 場所は のこす（配置を変えない） */
+.btn-main--sub {                       /* 「おわる」など 弱いほう */
+  min-width: 260px;
+  background: var(--kami);
+  color: var(--ai);
+  border-color: var(--ai);
+}
+
+/* ------------------------------------------------------------------ 9. 押せるものの 共通のようす */
+.coin-choice:hover, .coin-pile:hover, .btn-main:hover, .btn-yomu:hover, .btn-setting:hover {
+  transform: translateY(-4px);
+}
+.tray-coin:hover { transform: translateY(-4px); }
+.coin-choice:active, .coin-pile:active, .btn-main:active, .btn-yomu:active, .btn-setting:active {
+  transform: translateY(6px);
+  border-bottom-width: 6px;
+}
+.tray-coin:active { transform: translateY(4px); }
+
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.tray-coin:focus-visible { box-shadow: var(--focus-ring); }
+
+button:disabled, [aria-disabled="true"] { cursor: default; opacity: .5; }
+
+/* ------------------------------------------------------------------ 10. ヒント・せいかい の しるし */
+/* せいかい（えらんだ硬貨）: えんじの二重わく＋右上に はなまる */
+.is-correct {
+  border-color: var(--enji) !important;
+  box-shadow: 0 0 0 6px var(--kami), 0 0 0 14px var(--enji);
+}
+.is-correct::after {
+  content: "";
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 110px; height: 110px;
+  background: url("assets/hanamaru.svg") center / contain no-repeat;
+}
+
+/* ヒント1: 正しい硬貨の まわりに、その硬貨の色の 太いわく（点線＋実線の2本） */
+.hint-frame {
+  border-color: var(--ki-dark);
+  box-shadow: 0 0 0 8px var(--kami), 0 0 0 16px var(--ai);
+}
+.hint-frame--10  { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-10-ink); }
+.hint-frame--1   { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-1-ink); }
+
+/* ヒント: ほかを うすくする（押すことは できる） */
+.is-dim { opacity: .38; }
+
+/* ヒント: 穴の まわりを まるで かこむ。硬貨の絵は .coin-choice__coin（240px の箱）に入れ、その中に重ねる */
+.coin-choice__coin {
+  position: relative;
+  width: var(--coin-choice);
+  height: var(--coin-choice);
+}
+.coin-choice__coin img { width: 100%; height: 100%; }
+.hint-hole {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 6px solid var(--ai);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--kami);
+  pointer-events: none;
+}
+/* 穴の中心: coin-50 は上から 34.4%、coin-5 は 33.2%（assets の絵に合わせた値） */
+.hint-hole--50 { top: 34.4%; width: 72px; height: 72px; }
+.hint-hole--5  { top: 33.2%; width: 80px; height: 80px; }
+
+/* ヒント: 数字を大きく見せる ふだ（硬貨の上に重ねる） */
+.hint-num {
+  position: absolute;
+  left: 50%; top: 40px;
+  transform: translateX(-50%) rotate(-3deg);
+  min-width: 150px;
+  padding: 0 18px;
+  background: var(--kami);
+  color: var(--sumi);
+  border: 5px solid var(--ai);
+  border-radius: 10px;
+  font-size: 110px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* 3回目: こたえを ゆっくり 明るくする（点滅しない。2.4秒で1往復） */
+.is-answer {
+  animation: answer-glow 2.4s ease-in-out infinite;
+  box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--yamabuki);
+}
+@keyframes answer-glow {
+  0%, 100% { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--yamabuki); }
+  50%      { box-shadow: 0 0 0 8px var(--kami), 0 0 0 26px var(--yamabuki); }
+}
+
+/* おてほんの 手（.stage の上を JS で動かす。left/top を入れる） */
+.hand {
+  position: absolute;
+  width: 140px; height: 175px;
+  margin: -6px 0 0 -54px;              /* ゆびさきが left/top に来るように */
+  z-index: 40;
+  pointer-events: none;
+  transition: left 900ms cubic-bezier(.45, .05, .25, 1), top 900ms cubic-bezier(.45, .05, .25, 1);
+}
+.hand.is-press { transform: translateY(8px) scale(.96); transition-duration: 900ms, 900ms; }
+
+/* ------------------------------------------------------------------ 11. タイトル画面 */
+.screen--title {
+  background: url("assets/shotengai.svg") center / cover no-repeat;
+}
+.title-sign {
+  grid-column: 2 / 5;
+  grid-row: 3 / 5;
+  align-self: start;
+  justify-self: start;
+  position: relative;
+  margin: 10px 0 0 60px;
+  padding: 36px 70px 44px;
+  background: var(--enji);
+  background-image: var(--paper-noise);
+  color: var(--kami);
+  border: 14px solid var(--ki-dark);
+  border-radius: 10px 14px 8px 16px;
+  box-shadow: 0 18px 0 var(--sumi);
+  transform: rotate(-2.5deg);
+}
+.title-sign::before, .title-sign::after {   /* 看板をつるす ひも */
+  content: "";
+  position: absolute;
+  top: -150px;
+  width: 8px; height: 140px;
+  background: var(--sumi);
+}
+.title-sign::before { left: 120px; transform: rotate(6deg); }
+.title-sign::after { right: 120px; transform: rotate(-4deg); }
+.title-sign__shop {
+  display: block;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.3;
+  opacity: .92;
+}
+.title-sign__name {
+  display: block;
+  margin: 0;
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: var(--fs-title);
+  line-height: 1.15;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.title-shopkeeper {
+  grid-column: 4;
+  grid-row: 5 / 7;
+  justify-self: end;
+  align-self: end;
+  width: 400px;
+  height: 480px;
+  margin-right: 120px;
+  margin-bottom: -10px;
+}
+.title-bubble {                         /* 「いらっしゃい！」 */
+  grid-column: 4;
+  grid-row: 5;
+  justify-self: end;
+  align-self: start;
+  margin-right: 560px;
+  margin-top: 200px;
+  max-width: 560px;
+  padding: 20px 32px;
+  background: var(--kami);
+  border: 5px solid var(--sumi);
+  border-radius: 46px 46px 12px 46px;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.screen--title .counter { background-color: transparent; background-image: none; border-top: 0; box-shadow: none; }
+
+/* ------------------------------------------------------------------ 12. ふり返り画面 */
+.result-bag {
+  grid-column: 2;
+  grid-row: 3 / 6;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.result-bag__picture { position: relative; width: 360px; height: 450px; }
+.result-bag__picture > img:first-child { width: 100%; height: 100%; }
+.result-bag__items {                    /* ふくろの口から だがしが のぞく */
+  position: absolute;
+  left: 30px; right: 30px; top: -20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+}
+.result-bag__items img { width: 88px; height: 88px; margin: 0 -8px; }
+.result-bag__count {
+  padding: 6px 26px;
+  background: var(--kami);
+  border: 4px solid var(--sumi);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+.result-bag__count strong { font-family: var(--font-hand); font-weight: 400; font-size: 64px; line-height: 1; }
+
+.result-list {
+  grid-column: 4;
+  grid-row: 5;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  row-gap: 20px;
+}
+.result-item {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  column-gap: 24px;
+  padding: 6px 28px 6px 16px;
+  background: var(--kami);
+  background-image: var(--paper-noise);
+  border-left: 14px solid var(--ki);
+  box-shadow: 3px 4px 0 rgba(46, 34, 25, .16);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+.result-item:nth-child(2) { transform: rotate(.5deg); }
+.result-item:nth-child(3) { transform: rotate(-.4deg); }
+.result-item__stamp { width: 110px; height: 110px; }
+.result-item__coins { display: flex; gap: 4px; }
+.result-item__coins img { width: 64px; height: 64px; }
+
+/* ------------------------------------------------------------------ 13. ステップクリア（はり紙の ことばを かえ、3D の スタンプが おされる） */
+.stepclear-text {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  font-size: 76px;
+  color: var(--enji);
+  line-height: 1.3;
+}
+
+/* ------------------------------------------------------------------ 14. うごきを へらす */
+/* <body data-motion="low"> か OS の設定で、ふわっと出るだけにする */
+body[data-motion="low"] *, body[data-motion="low"] *::before, body[data-motion="low"] *::after {
+  animation: none !important;
+  transition-duration: 1ms !important;
+}
+body[data-motion="low"] .coin-choice:hover, body[data-motion="low"] .coin-pile:hover,
+body[data-motion="low"] .btn-main:hover, body[data-motion="low"] .btn-yomu:hover,
+body[data-motion="low"] .btn-setting:hover, body[data-motion="low"] .tray-coin:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 1ms !important; }
+}
+
+/* 見えかたの そろえ: 出てくるものは 0.25秒で ふわっと（うごきを へらす でも 使ってよい） */
+.fade-in { animation: fade-in .25s ease-out both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+body[data-motion="low"] .fade-in { animation: fade-in .25s ease-out both !important; }

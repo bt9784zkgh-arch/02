@@ -49,7 +49,9 @@
   --tap-gap: 40px;        /* となりとの間（縮めても 26px） */
   --coin-choice: 240px;   /* ステップ1 の硬貨の絵 */
   --coin-tray: 132px;     /* トレーの硬貨ボタン */
-  --focus-ring: 0 0 0 6px var(--kami), 0 0 0 12px var(--ai);
+  /* フォーカス: 山吹の太い点線（外）＋墨の帯（内）。ヒントの「藍の実線二重わく」とは形も色もちがう */
+  --focus-dash: 7px dashed var(--yamabuki);
+  --focus-offset: 6px;               /* 墨の帯の太さ＝点線までの すきま */
 
   /* 動き */
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
@@ -582,7 +584,7 @@ ruby rt {
   display: grid;
   grid-template-rows: 72px 1fr;
   padding: 10px 24px 20px;
-  background: #6E8F7A;                 /* 古い 緑の トレー（ゴムのおさら） */
+  background: #4F6F5B;                 /* 古い 緑の トレー（ゴムのおさら）。紙色の文字で 5.1:1 */
   border: 6px solid var(--sumi);
   border-radius: 44px 44px 40px 40px / 30px 30px 28px 28px;
   box-shadow: inset 0 0 0 10px rgba(251, 245, 230, .25);
@@ -633,7 +635,7 @@ ruby rt {
   font-size: var(--fs-small);
   font-weight: 700;
   line-height: 1.4;
-  background: #6E8F7A;
+  background: #4F6F5B;
   transform: translateY(-50%);
 }
 .tray--two .tray__room { padding-top: 14px; }
@@ -737,7 +739,7 @@ ruby rt {
 /* 大きい木札ボタン（はじめる・やってみる・これで おねがいします・つぎへ・もういちど あそぶ） */
 .btn-main {
   min-width: 420px;
-  height: 172px;
+  height: 184px;                       /* 1280×720 でも 122px */
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -755,6 +757,7 @@ ruby rt {
   cursor: pointer;
   transition: transform var(--t-press) ease-out, border-bottom-width var(--t-press) ease-out;
 }
+.btn-main { --focus-offset: 4px; }   /* カウンター（210px）の中に フォーカスの線が おさまるように */
 .btn-main[hidden] { display: flex; visibility: hidden; }    /* 場所は のこす（配置を変えない） */
 .btn-main--sub {                       /* 「おわる」など 弱いほう */
   min-width: 260px;
@@ -776,10 +779,11 @@ ruby rt {
 
 :focus { outline: none; }
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: var(--focus-dash);
+  outline-offset: var(--focus-offset);
+  /* 状態のわく（--state-ring）を のこしたまま、その外に 墨の帯 → 山吹の点線 */
+  box-shadow: var(--state-ring, 0 0 0 0 transparent), 0 0 0 var(--focus-offset) var(--sumi);
 }
-.tray-coin:focus-visible { box-shadow: var(--focus-ring); }
 
 button:disabled, [aria-disabled="true"] { cursor: default; opacity: .5; }
 
@@ -787,7 +791,9 @@ button:disabled, [aria-disabled="true"] { cursor: default; opacity: .5; }
 /* せいかい（えらんだ硬貨）: えんじの二重わく＋右上に はなまる */
 .is-correct {
   border-color: var(--enji) !important;
-  box-shadow: 0 0 0 6px var(--kami), 0 0 0 14px var(--enji);
+  --state-ring: 0 0 0 6px var(--kami), 0 0 0 14px var(--enji);
+  --focus-offset: 20px;
+  box-shadow: var(--state-ring);
 }
 .is-correct::after {
   content: "";
@@ -800,10 +806,12 @@ button:disabled, [aria-disabled="true"] { cursor: default; opacity: .5; }
 /* ヒント1: 正しい硬貨の まわりに、その硬貨の色の 太いわく（点線＋実線の2本） */
 .hint-frame {
   border-color: var(--ki-dark);
-  box-shadow: 0 0 0 8px var(--kami), 0 0 0 16px var(--ai);
+  --state-ring: 0 0 0 8px var(--kami), 0 0 0 16px var(--ai);
+  --focus-offset: 24px;
+  box-shadow: var(--state-ring);
 }
-.hint-frame--10  { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-10-ink); }
-.hint-frame--1   { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-1-ink); }
+.hint-frame--10  { --state-ring: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-10-ink); }
+.hint-frame--1   { --state-ring: 0 0 0 8px var(--kami), 0 0 0 18px var(--coin-1-ink); }
 
 /* ヒント: ほかを うすくする（押すことは できる） */
 .is-dim { opacity: .38; }
@@ -854,6 +862,12 @@ button:disabled, [aria-disabled="true"] { cursor: default; opacity: .5; }
 @keyframes answer-glow {
   0%, 100% { box-shadow: 0 0 0 8px var(--kami), 0 0 0 18px var(--yamabuki); }
   50%      { box-shadow: 0 0 0 8px var(--kami), 0 0 0 26px var(--yamabuki); }
+}
+/* こたえに フォーカスが来たら 動きを止め、墨の帯＋山吹の点線を外に出す */
+.is-answer:focus-visible {
+  animation: none;
+  --state-ring: 0 0 0 8px var(--kami), 0 0 0 18px var(--yamabuki);
+  --focus-offset: 26px;
 }
 
 /* おてほんの 手（.stage の上を JS で動かす。left/top を入れる） */

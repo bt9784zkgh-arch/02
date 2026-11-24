@@ -27,7 +27,7 @@ const LESSON = {
         { question: '1えんだまを ください', choices: [10, 1, 5], answer: 1,
           praise: 'すごい！ 1と かいてある 1えんだま だね', hint: '1と かいてあるよ', mark: 'num', dim: [5] },
         { question: '5えんだまを ください', choices: [50, 10, 5], answer: 5,
-          praise: 'やったね！ きんいろで あなが ある 5えんだま だね', hint: 'きんいろだよ', mark: 'frame', dim: [10] },
+          praise: 'やったね！ きんいろで あなが ある 5えんだま だね', hint: 'きんいろで 5と かいてあるよ', mark: 'num', dim: [50, 10] },
         { question: '50えんだまを ください', choices: [100, 50, 5], answer: 50,
           praise: 'よく みたね！ あなが ある ぎんいろは 50えん だね', hint: 'あなが あるよ', mark: 'hole', dim: [5] },
         { question: '100えんだまを ください', choices: [50, 100, 10], answer: 100,
@@ -44,11 +44,11 @@ const LESSON = {
         { item: 'らむね', img: 'ramune', price: 30, guide: true,
           praise: 'できた！ 10、20、30。30えん ぴったり だね', hint: 'まるの ところに のせよう' },
         { item: 'せんべい', img: 'senbei', price: 50, guide: true, countAloud: true,
-          praise: 'すごい！ 10えんだまが 5まいで 50えん だね', hint: 'まるの ところに のせよう。いっしょに かぞえるよ' },
+          praise: 'すごい！ 10えんだまが 5まいで 50えん だね', hint: 'まるの ところに のせよう' },
         { item: 'ちょこ', img: 'choco', price: 40, big: true,
           praise: 'よく かぞえたね！ 40えんは 10えんだま 4まい だね', hint: 'まるの ところに のせよう' },
         { item: 'わたがし', img: 'watagashi', price: 70, big: true, mark50: true,
-          praise: 'やったね！ 70えん ぴったり。たくさん かぞえられたね', hint: 'まるの ところに のせよう。5まいで 50えん だよ' },
+          praise: 'やったね！ 70えん ぴったり。たくさん かぞえられたね', hint: 'まるの ところに のせよう' },
       ],
     },
     {
@@ -77,14 +77,14 @@ const LESSON = {
     answerChoose: 'ひかっている おかねを いっしょに おそう',
     answerPay: 'おしい！ いっしょに かぞえよう',
     answerPayEnd: 'いっしょに かぞえたね。「これで おねがいします」を おそう',
-    full: 'もう のせられないよ。おかねを おすと もどるよ',
+    full: 'これで いっぱいだよ。おかねを おすと もどるよ',
     thanks: 'ありがとう！',
     backConfirm: 'もういちど「もどる」を おすと、はじめの がめんに もどるよ',
   },
   result: {
     heading: 'きょうの おかいもの、おしまい！\nよく がんばったね',   // \n で 行を かえる
     items: [
-      { text: '1えん・5えん・10えん・50えん・100えんの おかねが わかったね', coins: [1, 5, 10, 50, 100] },
+      { text: '1えん・5えん・10えん・50えん・100えんの\nおかねが わかったね', coins: [1, 5, 10, 50, 100] },
       { text: '10えんだまを かぞえて かえたね', coins: [10, 10, 10] },
       { text: '10えんと 1えんで ぴったり かえたね', coins: [10, 10, 1, 1] },
     ],
@@ -581,22 +581,32 @@ const LESSON = {
       if (!room) return;
       room.querySelectorAll('.tray-coin, .coin-slot, .tray-mark').forEach((n) => n.remove());
       const n = state.tray[v];
-      const slots = showSlots ? Math.max(ans[v], n) : n;
+      // ヒントの 点線の まるは 正解の数だけ。多く のせた硬貨は まるの外に 分けて おく
+      const slots = showSlots ? ans[v] : n;
+      const coinBtn = (i, over) => {
+        const b = el('button', 'tray-coin' + (over ? ' tray-coin--over' : '') + (newCoin === v && i === n - 1 ? ' fade-in' : ''),
+          '<img src="' + coinSrc(v) + '" alt="' + v + 'えんだま' + (over ? '（おおい ぶん）' : '') + '。おすと もどる">');
+        b.type = 'button';
+        b.dataset.coin = String(v);
+        b.addEventListener('click', () => onTrayCoin(v));
+        b.inert = state.phase !== 'question';
+        if (over) {   // 多い ぶん: 紙色の 点線で かこむ（見た目の しあげは style.css の .tray-coin--over）
+          b.style.outline = '5px dashed var(--kami)';
+          b.style.outlineOffset = '4px';
+        }
+        return b;
+      };
       let count = 0;
       for (let i = 0; i < slots; i++) {
-        if (i < n) {
-          const b = el('button', 'tray-coin' + (newCoin === v && i === n - 1 ? ' fade-in' : ''),
-            '<img src="' + coinSrc(v) + '" alt="' + v + 'えんだま。おすと もどる">');
-          b.type = 'button';
-          b.dataset.coin = String(v);
-          b.addEventListener('click', () => onTrayCoin(v));
-          b.inert = state.phase !== 'question';
-          room.appendChild(b);
-        } else {
-          room.appendChild(el('span', 'coin-slot coin-slot--' + v));
-        }
+        room.appendChild(i < n ? coinBtn(i, false) : el('span', 'coin-slot coin-slot--' + v));
         count++;
         if (showSlots && qd.mark50 && v === 10 && i === 4 && slots > 5) room.appendChild(el('span', 'tray-mark', 'ここまで 50'));
+      }
+      if (showSlots && n > slots) {
+        const sep = el('span', 'tray-over', 'おおい ぶん');
+        sep.style.cssText = 'align-self:center;margin-left:24px;padding:2px 12px;background:var(--kami);color:var(--sumi);font-size:var(--fs-small);font-weight:700;line-height:1.3;border-radius:6px;';
+        room.appendChild(sep);
+        for (let i = slots; i < n; i++) { room.appendChild(coinBtn(i, true)); count++; }
       }
       room.classList.toggle('is-crowded', count >= 6);
     });
@@ -654,7 +664,8 @@ const LESSON = {
       const nf = $('nefuda'); if (nf) nf.classList.remove('is-look');
       state.hintLevel = 2;
       renderTray();
-      setMessage('hint', word + '。' + qd.hint);
+      // ヒントの ことばは 2文まで（「もういちど」の ことば ＋ ヒントの 1文め）
+      setMessage('hint', word + '。' + String(qd.hint).split('。')[0]);
     } else {
       await payTogether(stepCfg, qd, ans);
     }
@@ -822,10 +833,9 @@ const LESSON = {
       setMain('これで<br>おねがいします', pay);
     }
     speak(questionText);
-    const first = $('harigami').querySelector('.btn-yomu');
-    if (document.activeElement && document.activeElement !== document.body) {
-      try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
-    }
+    // 1まいめの 硬貨（ステップ2・3 は 10えんの 山）に フォーカス
+    const first = st.kind === 'choose' ? $('playarea').querySelector('.coin-choice') : $('pile-10');
+    if (first) setTimeout(() => { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }, 30);
   }
 
   function nextQuestion() {

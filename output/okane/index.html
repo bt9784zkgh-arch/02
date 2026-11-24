@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おみせで おかいもの</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ゲーム組立担当の 追加（style.css は さわらない） */
+  .hand[hidden], .stamp-hanamaru[hidden], .kanban__step[hidden], .progress[hidden] { display: none !important; }
+  .settings-fixed { position: absolute; top: 20px; right: 40px; z-index: 60; }
+  .settings-space { width: 432px; height: 124px; }
+  .btn-setting__icon { width: 40px !important; height: 40px !important; }
+  .btn-setting__state { display: block; font-size: 22px; font-weight: 500; line-height: 1; }
+  /* 1回目の まちがい: ヒントの絵に 藍の点線（うごかない） */
+  .is-look { outline: 6px dashed var(--ai); outline-offset: 10px; border-radius: 50%; }
+  .nefuda.is-look { border-radius: 3px 8px 4px 6px; }
+  .title-yomu { justify-self: start; }
+  .harigami .question { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="stage3d" id="stage3d"></div>
+
+  <!-- タイトル -->
+  <main class="screen screen--title" id="screen-title">
+    <div class="title-sign">
+      <span class="title-sign__shop">だがしや まるや</span>
+      <h1 class="title-sign__name">おみせで おかいもの</h1>
+    </div>
+    <p class="title-bubble" id="title-bubble">いらっしゃい！<br>おかいものを しよう</p>
+    <img class="title-shopkeeper" src="assets/shopkeeper-smile.svg" alt="おみせの ひと">
+    <footer class="counter">
+      <button class="btn-yomu title-yomu" id="title-yomu" type="button"><img src="assets/icon-yomu.svg" alt="">よむ</button>
+      <div class="counter__buttons"><button class="btn-main" id="btn-start" type="button">はじめる</button></div>
+    </footer>
+  </main>
+
+  <!-- あそぶ（おてほん・もんだい・ステップクリア） -->
+  <main class="screen" id="screen-play" hidden>
+    <header class="hud">
+      <div class="kanban" id="kanban"><span class="kanban__step" id="kanban-step">1</span><span class="kanban__name" id="kanban-name">おかねを しろう</span></div>
+      <div class="progress" id="progress">
+        <ol class="progress__dots" id="progress-dots" aria-hidden="true"></ol>
+        <p class="progress__text" id="progress-text"></p>
+      </div>
+      <div class="settings-space" aria-hidden="true"></div>
+    </header>
+    <aside class="shopside">
+      <div class="shopkeeper"><img id="shopkeeper" src="assets/shopkeeper.svg" alt="おみせの ひと"></div>
+      <div class="shelf" id="shelf"></div>
+    </aside>
+    <section class="harigami" id="harigami"></section>
+    <section class="playarea" id="playarea"></section>
+    <footer class="counter">
+      <div class="message is-empty" id="message"></div>
+      <div class="counter__buttons"><button class="btn-main" id="btn-main" type="button" hidden>つぎへ</button></div>
+    </footer>
+  </main>
+
+  <!-- ふり返り -->
+  <main class="screen" id="screen-result" hidden>
+    <header class="hud">
+      <div class="kanban"><span class="kanban__name">ふりかえり</span></div>
+      <div></div>
+      <div class="settings-space" aria-hidden="true"></div>
+    </header>
+    <div class="result-bag">
+      <div class="result-bag__picture">
+        <img src="assets/bag.svg" alt="おみせの ふくろ">
+        <div class="result-bag__items" id="result-items"></div>
+      </div>
+      <p class="result-bag__count" id="result-count"></p>
+    </div>
+    <section class="harigami" id="result-harigami"></section>
+    <ul class="result-list" id="result-list"></ul>
+    <footer class="counter">
+      <div class="message" id="result-message"></div>
+      <div class="counter__buttons">
+        <button class="btn-main btn-main--sub" id="btn-end" type="button">おわる</button>
+        <button class="btn-main" id="btn-again" type="button">もういちど<br>あそぶ</button>
+      </div>
+    </footer>
+  </main>
+
+  <img class="hand" id="hand" src="assets/hand.svg" alt="" hidden>
+
+  <!-- せってい（右上に こてい） -->
+  <div class="settings settings-fixed" role="group" aria-label="せってい">
+    <button class="btn-setting" id="btn-sound" type="button" aria-pressed="true"><img class="btn-setting__icon" id="icon-sound" src="assets/icon-oto-on.svg" alt="">おと<span class="btn-setting__state" id="state-sound">あり</span></button>
+    <button class="btn-setting" id="btn-motion" type="button" aria-pressed="true"><img class="btn-setting__icon" src="assets/icon-ugoki.svg" alt="">うごき<span class="btn-setting__state" id="state-motion">ふつう</span></button>
+    <button class="btn-setting" id="btn-back" type="button"><img src="assets/icon-modoru.svg" alt="">もどる</button>
+  </div>
+
+  <p class="sr-only" id="live" aria-live="polite"></p>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="motion3d.js"></script>
+<script src="bgm.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
